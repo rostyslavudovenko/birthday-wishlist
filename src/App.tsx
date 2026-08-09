@@ -1,122 +1,176 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import "./App.css";
 
-function App() {
-  const [count, setCount] = useState(0)
+type Gift = {
+  id: number;
+  name: string;
+  description: string;
+  price: string;
+  image: string;
+  reserved: boolean;
+};
 
+const gifts: Gift[] = [
+  {
+    id: 1,
+    name: "Mechanical Keyboard",
+    description:
+      "A compact wireless keyboard with a comfortable layout for everyday work.",
+    price: "Around €100",
+    image: "⌨",
+    reserved: false,
+  },
+  {
+    id: 2,
+    name: "Coffee Grinder",
+    description:
+      "A small manual grinder for making fresh coffee at home or while travelling.",
+    price: "Around €45",
+    image: "☕",
+    reserved: true,
+  },
+  {
+    id: 3,
+    name: "LEGO Architecture Set",
+    description:
+      "A detailed building set for a quiet evening and a spot on the bookshelf.",
+    price: "Around €60",
+    image: "🏛",
+    reserved: false,
+  },
+];
+
+function GiftCard({ gift }: { gift: Gift }) {
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <article className="gift-window">
+      <header className="window-title-bar">
+        <span className="window-control" aria-hidden="true" />
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+        <div className="title-lines" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+          <span />
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        <h2>{gift.name}</h2>
+
+        <div className="title-lines" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+          <span />
+        </div>
+
+        <span
+          className="window-control window-control--right"
+          aria-hidden="true"
+        />
+      </header>
+
+      <div className="gift-content">
+        <div className="gift-image" aria-hidden="true">
+          {gift.image}
+        </div>
+
+        <div className="gift-details">
+          <div className="gift-heading">
+            <h3>{gift.name}</h3>
+
+            <span
+              className={`status-badge ${
+                gift.reserved ? "status-badge--reserved" : ""
+              }`}
+            >
+              {gift.reserved ? "Reserved" : "Available"}
+            </span>
+          </div>
+
+          <p>{gift.description}</p>
+          <p className="gift-price">{gift.price}</p>
+
+          <button
+            className="retro-button"
+            type="button"
+            disabled={gift.reserved}
+          >
+            {gift.reserved ? "Already chosen" : "Choose this gift"}
+          </button>
+        </div>
+      </div>
+    </article>
+  );
 }
 
-export default App
+function App() {
+  const availableCount = gifts.filter((gift) => !gift.reserved).length;
+
+  return (
+    <main className="desktop">
+      <section className="wishlist-window">
+        <header className="window-title-bar window-title-bar--main">
+          <span className="window-control" aria-hidden="true" />
+
+          <div className="title-lines" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+            <span />
+          </div>
+
+          <h1>Birthday Wishlist</h1>
+
+          <div className="title-lines" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+            <span />
+          </div>
+
+          <span
+            className="window-control window-control--right"
+            aria-hidden="true"
+          />
+        </header>
+
+        <div className="wishlist-content">
+          <section className="intro">
+            <div className="intro-icon" aria-hidden="true">
+              🎁
+            </div>
+
+            <div>
+              <h2>Welcome to my wishlist!</h2>
+              <p>
+                Choose a gift you would like to give. Once selected, it will be
+                marked as reserved for everyone else.
+              </p>
+            </div>
+          </section>
+
+          <div className="toolbar" aria-label="Wishlist summary">
+            <span>
+              {gifts.length} {gifts.length === 1 ? "gift" : "gifts"}
+            </span>
+            <span>
+              {availableCount} {availableCount === 1 ? "is" : "are"} still
+              available
+            </span>
+          </div>
+
+          <section className="gift-grid" aria-label="Birthday gifts">
+            {gifts.map((gift) => (
+              <GiftCard key={gift.id} gift={gift} />
+            ))}
+          </section>
+
+          <footer className="wishlist-footer">
+            <span aria-hidden="true">♥</span>
+            <p>Thank you for making my birthday special.</p>
+          </footer>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+export default App;
