@@ -5,4 +5,5 @@ export type Gift = {
   price: string;
   image: string;
   reservedBy: string | null;
+  reservationToken: string | null;
 };

@@ -9,6 +9,7 @@ export const initialGifts: Gift[] = [
     price: "Around €100",
     image: "⌨",
     reservedBy: null,
+    reservationToken: null,
   },
   {
     id: 2,
@@ -18,6 +19,7 @@ export const initialGifts: Gift[] = [
     price: "Around €45",
     image: "☕",
     reservedBy: "Reserved",
+    reservationToken: null,
   },
   {
     id: 3,
@@ -27,5 +29,6 @@ export const initialGifts: Gift[] = [
     price: "Around €60",
     image: "🏛",
     reservedBy: null,
+    reservationToken: null,
   },
 ];

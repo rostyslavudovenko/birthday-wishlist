@@ -1,22 +1,34 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "./App.css";
 import GiftCard from "./components/GiftCard";
 import ReservationDialog from "./components/ReservationDialog";
-import { initialGifts } from "./data/gifts";
 import type { Gift } from "./types/gift";
+import { getVisitorToken, loadGifts, saveGifts } from "./utils/storage";
 
 function App() {
-  const [gifts, setGifts] = useState(initialGifts);
+  const [gifts, setGifts] = useState<Gift[]>(loadGifts);
   const [selectedGift, setSelectedGift] = useState<Gift | null>(null);
-  const [localReservations, setLocalReservations] = useState<number[]>([]);
+  const [visitorToken] = useState(getVisitorToken);
 
   const availableCount = gifts.filter(
     (gift) => gift.reservedBy === null,
   ).length;
 
+  useEffect(() => {
+    saveGifts(gifts);
+  }, [gifts]);
+
   const closeReservationDialog = useCallback(() => {
     setSelectedGift(null);
   }, []);
+
+  const openReservationDialog = (gift: Gift) => {
+    if (gift.reservedBy !== null) {
+      return;
+    }
+
+    setSelectedGift(gift);
+  };
 
   const reserveGift = (name: string) => {
     if (!selectedGift) {
@@ -24,28 +36,38 @@ function App() {
     }
 
     setGifts((currentGifts) =>
-      currentGifts.map((gift) =>
-        gift.id === selectedGift.id ? { ...gift, reservedBy: name } : gift,
-      ),
-    );
+      currentGifts.map((gift) => {
+        if (gift.id !== selectedGift.id || gift.reservedBy !== null) {
+          return gift;
+        }
 
-    setLocalReservations((currentReservations) => [
-      ...currentReservations,
-      selectedGift.id,
-    ]);
+        return {
+          ...gift,
+          reservedBy: name,
+          reservationToken: visitorToken,
+        };
+      }),
+    );
 
     setSelectedGift(null);
   };
 
   const releaseGift = (giftId: number) => {
     setGifts((currentGifts) =>
-      currentGifts.map((gift) =>
-        gift.id === giftId ? { ...gift, reservedBy: null } : gift,
-      ),
-    );
+      currentGifts.map((gift) => {
+        const belongsToVisitor =
+          gift.id === giftId && gift.reservationToken === visitorToken;
 
-    setLocalReservations((currentReservations) =>
-      currentReservations.filter((reservationId) => reservationId !== giftId),
+        if (!belongsToVisitor) {
+          return gift;
+        }
+
+        return {
+          ...gift,
+          reservedBy: null,
+          reservationToken: null,
+        };
+      }),
     );
   };
 
@@ -96,6 +118,7 @@ function App() {
             <span>
               {gifts.length} {gifts.length === 1 ? "gift" : "gifts"}
             </span>
+
             <span>
               {availableCount} {availableCount === 1 ? "is" : "are"} still
               available
@@ -107,8 +130,8 @@ function App() {
               <GiftCard
                 key={gift.id}
                 gift={gift}
-                canRelease={localReservations.includes(gift.id)}
-                onChoose={setSelectedGift}
+                canRelease={gift.reservationToken === visitorToken}
+                onChoose={openReservationDialog}
                 onRelease={releaseGift}
               />
             ))}
