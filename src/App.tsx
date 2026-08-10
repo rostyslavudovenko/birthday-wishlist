@@ -1,108 +1,53 @@
+import { useCallback, useState } from "react";
 import "./App.css";
-
-type Gift = {
-  id: number;
-  name: string;
-  description: string;
-  price: string;
-  image: string;
-  reserved: boolean;
-};
-
-const gifts: Gift[] = [
-  {
-    id: 1,
-    name: "Mechanical Keyboard",
-    description:
-      "A compact wireless keyboard with a comfortable layout for everyday work.",
-    price: "Around €100",
-    image: "⌨",
-    reserved: false,
-  },
-  {
-    id: 2,
-    name: "Coffee Grinder",
-    description:
-      "A small manual grinder for making fresh coffee at home or while travelling.",
-    price: "Around €45",
-    image: "☕",
-    reserved: true,
-  },
-  {
-    id: 3,
-    name: "LEGO Architecture Set",
-    description:
-      "A detailed building set for a quiet evening and a spot on the bookshelf.",
-    price: "Around €60",
-    image: "🏛",
-    reserved: false,
-  },
-];
-
-function GiftCard({ gift }: { gift: Gift }) {
-  return (
-    <article className="gift-window">
-      <header className="window-title-bar">
-        <span className="window-control" aria-hidden="true" />
-
-        <div className="title-lines" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-          <span />
-        </div>
-
-        <h2>{gift.name}</h2>
-
-        <div className="title-lines" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-          <span />
-        </div>
-
-        <span
-          className="window-control window-control--right"
-          aria-hidden="true"
-        />
-      </header>
-
-      <div className="gift-content">
-        <div className="gift-image" aria-hidden="true">
-          {gift.image}
-        </div>
-
-        <div className="gift-details">
-          <div className="gift-heading">
-            <h3>{gift.name}</h3>
-
-            <span
-              className={`status-badge ${
-                gift.reserved ? "status-badge--reserved" : ""
-              }`}
-            >
-              {gift.reserved ? "Reserved" : "Available"}
-            </span>
-          </div>
-
-          <p>{gift.description}</p>
-          <p className="gift-price">{gift.price}</p>
-
-          <button
-            className="retro-button"
-            type="button"
-            disabled={gift.reserved}
-          >
-            {gift.reserved ? "Already chosen" : "Choose this gift"}
-          </button>
-        </div>
-      </div>
-    </article>
-  );
-}
+import GiftCard from "./components/GiftCard";
+import ReservationDialog from "./components/ReservationDialog";
+import { initialGifts } from "./data/gifts";
+import type { Gift } from "./types/gift";
 
 function App() {
-  const availableCount = gifts.filter((gift) => !gift.reserved).length;
+  const [gifts, setGifts] = useState(initialGifts);
+  const [selectedGift, setSelectedGift] = useState<Gift | null>(null);
+  const [localReservations, setLocalReservations] = useState<number[]>([]);
+
+  const availableCount = gifts.filter(
+    (gift) => gift.reservedBy === null,
+  ).length;
+
+  const closeReservationDialog = useCallback(() => {
+    setSelectedGift(null);
+  }, []);
+
+  const reserveGift = (name: string) => {
+    if (!selectedGift) {
+      return;
+    }
+
+    setGifts((currentGifts) =>
+      currentGifts.map((gift) =>
+        gift.id === selectedGift.id ? { ...gift, reservedBy: name } : gift,
+      ),
+    );
+
+    setLocalReservations((currentReservations) => [
+      ...currentReservations,
+      selectedGift.id,
+    ]);
+
+    setSelectedGift(null);
+  };
+
+  const releaseGift = (giftId: number) => {
+    setGifts((currentGifts) =>
+      currentGifts.map((gift) =>
+        gift.id === giftId ? { ...gift, reservedBy: null } : gift,
+      ),
+    );
+
+    setLocalReservations((currentReservations) =>
+      currentReservations.filter((reservationId) => reservationId !== giftId),
+    );
+  };
 
   return (
     <main className="desktop">
@@ -159,7 +104,13 @@ function App() {
 
           <section className="gift-grid" aria-label="Birthday gifts">
             {gifts.map((gift) => (
-              <GiftCard key={gift.id} gift={gift} />
+              <GiftCard
+                key={gift.id}
+                gift={gift}
+                canRelease={localReservations.includes(gift.id)}
+                onChoose={setSelectedGift}
+                onRelease={releaseGift}
+              />
             ))}
           </section>
 
@@ -169,6 +120,14 @@ function App() {
           </footer>
         </div>
       </section>
+
+      {selectedGift && (
+        <ReservationDialog
+          gift={selectedGift}
+          onCancel={closeReservationDialog}
+          onConfirm={reserveGift}
+        />
+      )}
     </main>
   );
 }
