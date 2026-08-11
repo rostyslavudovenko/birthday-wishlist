@@ -4,6 +4,7 @@ export type Gift = {
   description: string;
   price: string;
   image: string;
-  reservedBy: string | null;
-  reservationToken: string | null;
+  storeUrl: string | null;
+  displayOrder: number;
+  isReserved: boolean;
 };

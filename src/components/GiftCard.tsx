@@ -3,12 +3,25 @@ import type { Gift } from "../types/gift";
 type GiftCardProps = {
   gift: Gift;
   canRelease: boolean;
+  isUpdating: boolean;
   onChoose: (gift: Gift) => void;
   onRelease: (giftId: number) => void;
 };
 
-function GiftCard({ gift, canRelease, onChoose, onRelease }: GiftCardProps) {
-  const isReserved = gift.reservedBy !== null;
+function GiftCard({
+  gift,
+  canRelease,
+  isUpdating,
+  onChoose,
+  onRelease,
+}: GiftCardProps) {
+  const showReleaseButton = gift.isReserved && canRelease;
+
+  const chooseButtonLabel = isUpdating
+    ? "Saving..."
+    : gift.isReserved
+      ? "Already chosen"
+      : "Choose this gift";
 
   return (
     <article className="gift-window">
@@ -48,32 +61,34 @@ function GiftCard({ gift, canRelease, onChoose, onRelease }: GiftCardProps) {
 
             <span
               className={`status-badge ${
-                isReserved ? "status-badge--reserved" : ""
+                gift.isReserved ? "status-badge--reserved" : ""
               }`}
             >
-              {isReserved ? "Reserved" : "Available"}
+              {gift.isReserved ? "Reserved" : "Available"}
             </span>
           </div>
 
           <p>{gift.description}</p>
+
           <p className="gift-price">{gift.price}</p>
 
-          {canRelease ? (
+          {showReleaseButton ? (
             <button
               className="retro-button retro-button--secondary"
               type="button"
+              disabled={isUpdating}
               onClick={() => onRelease(gift.id)}
             >
-              Release my reservation
+              {isUpdating ? "Releasing..." : "Release my reservation"}
             </button>
           ) : (
             <button
               className="retro-button"
               type="button"
-              disabled={isReserved}
+              disabled={gift.isReserved || isUpdating}
               onClick={() => onChoose(gift)}
             >
-              {isReserved ? "Already chosen" : "Choose this gift"}
+              {chooseButtonLabel}
             </button>
           )}
         </div>

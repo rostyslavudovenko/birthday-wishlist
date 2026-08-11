@@ -1,26 +1,36 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 import type { Gift } from "../types/gift";
 
 type ReservationDialogProps = {
   gift: Gift;
+  isSubmitting: boolean;
+  submitError: string | null;
   onCancel: () => void;
   onConfirm: (name: string) => void;
 };
 
 function ReservationDialog({
   gift,
+  isSubmitting,
+  submitError,
   onCancel,
   onConfirm,
 }: ReservationDialogProps) {
   const [name, setName] = useState("");
-  const [error, setError] = useState("");
+  const [validationError, setValidationError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     inputRef.current?.focus();
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key === "Escape" && !isSubmitting) {
         onCancel();
       }
     };
@@ -32,21 +42,21 @@ function ReservationDialog({
       document.removeEventListener("keydown", handleKeyDown);
       document.body.classList.remove("dialog-open");
     };
-  }, [onCancel]);
+  }, [isSubmitting, onCancel]);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const trimmedName = name.trim();
 
     if (trimmedName.length < 2) {
-      setError("Please enter at least 2 characters.");
+      setValidationError("Please enter at least 2 characters.");
       inputRef.current?.focus();
       return;
     }
 
     if (trimmedName.length > 50) {
-      setError("Please keep the name under 50 characters.");
+      setValidationError("Please keep the name under 50 characters.");
       inputRef.current?.focus();
       return;
     }
@@ -54,20 +64,22 @@ function ReservationDialog({
     onConfirm(trimmedName);
   };
 
-  const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setName(event.target.value);
 
-    if (error) {
-      setError("");
+    if (validationError) {
+      setValidationError("");
     }
   };
+
+  const displayedError = validationError || submitError;
 
   return (
     <div
       className="dialog-backdrop"
       role="presentation"
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget) {
+        if (event.target === event.currentTarget && !isSubmitting) {
           onCancel();
         }
       }}
@@ -112,6 +124,7 @@ function ReservationDialog({
 
             <div>
               <h2 id="reservation-title">Choose {gift.name}?</h2>
+
               <p id="reservation-description">
                 Enter your name to reserve this gift. Your name will not be
                 shown publicly.
@@ -125,21 +138,24 @@ function ReservationDialog({
 
           <input
             ref={inputRef}
-            className={`retro-input ${error ? "retro-input--error" : ""}`}
+            className={`retro-input ${
+              displayedError ? "retro-input--error" : ""
+            }`}
             id="guest-name"
             name="guestName"
             type="text"
             value={name}
             maxLength={50}
             autoComplete="name"
-            aria-invalid={Boolean(error)}
-            aria-describedby={error ? "name-error" : undefined}
+            disabled={isSubmitting}
+            aria-invalid={Boolean(displayedError)}
+            aria-describedby={displayedError ? "name-error" : undefined}
             onChange={handleNameChange}
           />
 
-          {error && (
+          {displayedError && (
             <p className="field-error" id="name-error" role="alert">
-              {error}
+              {displayedError}
             </p>
           )}
 
@@ -147,13 +163,18 @@ function ReservationDialog({
             <button
               className="retro-button retro-button--secondary"
               type="button"
+              disabled={isSubmitting}
               onClick={onCancel}
             >
               Cancel
             </button>
 
-            <button className="retro-button" type="submit">
-              Reserve gift
+            <button
+              className="retro-button"
+              type="submit"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Reserving..." : "Reserve gift"}
             </button>
           </div>
         </form>

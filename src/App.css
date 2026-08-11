@@ -285,6 +285,67 @@
   margin: 0;
 }
 
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 12px;
+  border: 2px solid var(--black);
+  background: var(--white);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.notice--error {
+  border-style: dashed;
+}
+
+.notice-action {
+  flex: 0 0 auto;
+  padding: 4px 6px;
+  border: 0;
+  border-bottom: 1px solid var(--black);
+  background: transparent;
+  color: var(--black);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.notice-action:hover {
+  color: var(--dark-gray);
+}
+
+.notice-action:focus-visible {
+  outline: 3px dotted var(--black);
+  outline-offset: 3px;
+}
+
+.state-window {
+  display: grid;
+  min-height: 220px;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  border: 2px dashed var(--black);
+  background: var(--white);
+  text-align: center;
+}
+
+.state-window p {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.state-icon {
+  font-size: 2rem;
+  filter: grayscale(1);
+}
+
 @media (max-width: 850px) {
   .gift-grid {
     grid-template-columns: 1fr;
@@ -294,6 +355,11 @@
 @media (max-width: 560px) {
   .desktop {
     padding: 10px;
+  }
+
+  .notice {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .wishlist-content {
