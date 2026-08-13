@@ -2,6 +2,8 @@ const visitorTokenStorageKey = "birthday-wishlist:visitor-token";
 
 const reservationIdsStorageKey = "birthday-wishlist:reservation-ids";
 
+type StoredReservations = Record<string, number[]>;
+
 export function getVisitorToken() {
   const storedToken = localStorage.getItem(visitorTokenStorageKey);
 
@@ -16,33 +18,58 @@ export function getVisitorToken() {
   return token;
 }
 
-export function loadReservationIds(): number[] {
+function loadStoredReservations(): StoredReservations {
   try {
     const storedValue = localStorage.getItem(reservationIdsStorageKey);
 
     if (!storedValue) {
-      return [];
+      return {};
     }
 
     const parsedValue: unknown = JSON.parse(storedValue);
 
     if (
-      !Array.isArray(parsedValue) ||
-      !parsedValue.every(
-        (value) => typeof value === "number" && Number.isInteger(value),
-      )
+      !parsedValue ||
+      typeof parsedValue !== "object" ||
+      Array.isArray(parsedValue)
     ) {
       localStorage.removeItem(reservationIdsStorageKey);
-      return [];
+      return {};
     }
 
-    return parsedValue;
+    const entries = Object.entries(parsedValue);
+
+    const isValid = entries.every(
+      ([slug, giftIds]) =>
+        slug.length > 0 &&
+        Array.isArray(giftIds) &&
+        giftIds.every(
+          (giftId) => typeof giftId === "number" && Number.isInteger(giftId),
+        ),
+    );
+
+    if (!isValid) {
+      localStorage.removeItem(reservationIdsStorageKey);
+      return {};
+    }
+
+    return parsedValue as StoredReservations;
   } catch {
     localStorage.removeItem(reservationIdsStorageKey);
-    return [];
+    return {};
   }
 }
 
-export function saveReservationIds(giftIds: number[]) {
-  localStorage.setItem(reservationIdsStorageKey, JSON.stringify(giftIds));
+export function loadReservationIds(wishlistSlug: string): number[] {
+  const reservations = loadStoredReservations();
+
+  return reservations[wishlistSlug] ?? [];
+}
+
+export function saveReservationIds(wishlistSlug: string, giftIds: number[]) {
+  const reservations = loadStoredReservations();
+
+  reservations[wishlistSlug] = giftIds;
+
+  localStorage.setItem(reservationIdsStorageKey, JSON.stringify(reservations));
 }
