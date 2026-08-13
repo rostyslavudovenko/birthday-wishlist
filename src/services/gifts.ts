@@ -25,39 +25,31 @@ function mapGift(row: GiftRow): Gift {
   };
 }
 
-export async function fetchGifts(): Promise<Gift[]> {
-  const { data, error } = await supabase
-    .from("public_gifts")
-    .select(
-      `
-        id,
-        name,
-        description,
-        price,
-        image,
-        store_url,
-        display_order,
-        is_reserved
-      `,
-    )
-    .order("display_order", { ascending: true });
+export async function fetchWishlistGifts(
+  wishlistSlug: string,
+): Promise<Gift[]> {
+  const { data, error } = await supabase.rpc("get_wishlist_gifts", {
+    p_wishlist_slug: wishlistSlug,
+  });
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return (data as GiftRow[]).map(mapGift);
+  return ((data ?? []) as GiftRow[]).map(mapGift);
 }
 
 export async function reserveGift(
+  wishlistSlug: string,
   giftId: number,
   guestName: string,
   visitorToken: string,
 ): Promise<boolean> {
   const { data, error } = await supabase.rpc("reserve_gift", {
-    gift_id: giftId,
-    guest_name: guestName,
-    visitor_token: visitorToken,
+    p_wishlist_slug: wishlistSlug,
+    p_gift_id: giftId,
+    p_guest_name: guestName,
+    p_visitor_token: visitorToken,
   });
 
   if (error) {
@@ -68,12 +60,14 @@ export async function reserveGift(
 }
 
 export async function releaseGift(
+  wishlistSlug: string,
   giftId: number,
   visitorToken: string,
 ): Promise<boolean> {
   const { data, error } = await supabase.rpc("release_gift", {
-    gift_id: giftId,
-    visitor_token: visitorToken,
+    p_wishlist_slug: wishlistSlug,
+    p_gift_id: giftId,
+    p_visitor_token: visitorToken,
   });
 
   if (error) {
