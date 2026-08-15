@@ -1,13 +1,19 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import { Link, useParams } from "react-router";
 import GiftCard from "../components/GiftCard";
 import MacWindow from "../components/MacWindow";
 import ReservationDialog from "../components/ReservationDialog";
+import { supabase } from "../lib/supabase";
 import {
   fetchWishlistGifts,
   releaseGift as releaseGiftRequest,
   reserveGift as reserveGiftRequest,
 } from "../services/gifts";
+import {
+  broadcastWishlistChange,
+  createWishlistChannel,
+} from "../services/realtime";
 import { fetchWishlist } from "../services/wishlists";
 import type { Gift } from "../types/gift";
 import type { Wishlist } from "../types/wishlist";
@@ -32,6 +38,19 @@ function WishlistPage() {
   const [pageError, setPageError] = useState<string | null>(null);
   const [dialogError, setDialogError] = useState<string | null>(null);
 
+  const realtimeChannelRef = useRef<RealtimeChannel | null>(null);
+
+  /*
+   * These values are safe to use throughout the component.
+   * No code below needs to read a property directly from
+   * the nullable wishlist state.
+   */
+  const activeWishlistSlug = wishlist?.slug ?? slug;
+  const wishlistTitle = wishlist?.title ?? "Wishlist";
+  const wishlistDescription = wishlist?.description ?? "";
+  const wishlistIcon = wishlist?.icon ?? "🎁";
+  const wishlistVisibility = wishlist?.visibility ?? null;
+
   const availableCount = gifts.filter((gift) => !gift.isReserved).length;
 
   const loadWishlist = useCallback(async () => {
@@ -51,6 +70,7 @@ function WishlistPage() {
       ]);
 
       setWishlist(wishlistDetails);
+
       setGifts(wishlistDetails ? wishlistGifts : []);
 
       if (!wishlistDetails) {
@@ -82,6 +102,7 @@ function WishlistPage() {
       setGifts([]);
       setSelectedGift(null);
       setDialogError(null);
+      setPageError(null);
       setReservationIds(loadReservationIds(slug));
       setIsLoading(true);
 
@@ -92,6 +113,62 @@ function WishlistPage() {
       window.clearTimeout(timeoutId);
     };
   }, [loadWishlist, slug]);
+
+  useEffect(() => {
+    if (!slug) {
+      return;
+    }
+
+    const channel = createWishlistChannel(slug, () => {
+      void loadWishlist();
+    });
+
+    realtimeChannelRef.current = channel;
+
+    channel.subscribe((status) => {
+      if (status === "CHANNEL_ERROR") {
+        console.error(`Could not connect to live updates for ${slug}.`);
+      }
+
+      if (status === "TIMED_OUT") {
+        console.error(`Live update connection timed out for ${slug}.`);
+      }
+    });
+
+    return () => {
+      if (realtimeChannelRef.current === channel) {
+        realtimeChannelRef.current = null;
+      }
+
+      void supabase.removeChannel(channel);
+    };
+  }, [loadWishlist, slug]);
+
+  useEffect(() => {
+    const handleWindowFocus = () => {
+      void loadWishlist();
+    };
+
+    window.addEventListener("focus", handleWindowFocus);
+
+    return () => {
+      window.removeEventListener("focus", handleWindowFocus);
+    };
+  }, [loadWishlist]);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        void loadWishlist();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [loadWishlist]);
 
   const closeReservationDialog = useCallback(() => {
     if (updatingGiftId !== null) {
@@ -111,19 +188,36 @@ function WishlistPage() {
     setSelectedGift(gift);
   };
 
-  const reserveGift = async (name: string) => {
-    if (!selectedGift || !wishlist) {
+  const notifyOtherVisitors = useCallback(async () => {
+    const channel = realtimeChannelRef.current;
+
+    if (!channel) {
       return;
     }
 
-    const giftId = selectedGift.id;
+    try {
+      await broadcastWishlistChange(channel);
+    } catch (broadcastError) {
+      console.error(
+        `Could not broadcast an update for ${slug}:`,
+        broadcastError,
+      );
+    }
+  }, [slug]);
+
+  const reserveGift = async (name: string) => {
+    const giftId = selectedGift?.id;
+
+    if (giftId === undefined || !activeWishlistSlug) {
+      return;
+    }
 
     setUpdatingGiftId(giftId);
     setDialogError(null);
 
     try {
       const wasReserved = await reserveGiftRequest(
-        wishlist.slug,
+        activeWishlistSlug,
         giftId,
         name,
         visitorToken,
@@ -143,7 +237,7 @@ function WishlistPage() {
           ? currentIds
           : [...currentIds, giftId];
 
-        saveReservationIds(wishlist.slug, nextIds);
+        saveReservationIds(activeWishlistSlug, nextIds);
 
         return nextIds;
       });
@@ -160,6 +254,8 @@ function WishlistPage() {
       );
 
       setSelectedGift(null);
+
+      await notifyOtherVisitors();
     } catch (reservationError) {
       console.error("Could not reserve gift:", reservationError);
 
@@ -170,7 +266,7 @@ function WishlistPage() {
   };
 
   const releaseGift = async (giftId: number) => {
-    if (!wishlist) {
+    if (!activeWishlistSlug) {
       return;
     }
 
@@ -179,7 +275,7 @@ function WishlistPage() {
 
     try {
       const wasReleased = await releaseGiftRequest(
-        wishlist.slug,
+        activeWishlistSlug,
         giftId,
         visitorToken,
       );
@@ -196,7 +292,7 @@ function WishlistPage() {
       setReservationIds((currentIds) => {
         const nextIds = currentIds.filter((currentId) => currentId !== giftId);
 
-        saveReservationIds(wishlist.slug, nextIds);
+        saveReservationIds(activeWishlistSlug, nextIds);
 
         return nextIds;
       });
@@ -211,6 +307,8 @@ function WishlistPage() {
             : gift,
         ),
       );
+
+      await notifyOtherVisitors();
     } catch (releaseError) {
       console.error("Could not release gift:", releaseError);
 
@@ -243,19 +341,45 @@ function WishlistPage() {
     );
   }
 
-  if (!wishlist && !pageError) {
+  if (!wishlist) {
+    const hasLoadingError = Boolean(pageError);
+
     return (
       <main className="desktop">
-        <MacWindow title="Wishlist Not Found">
+        <MacWindow
+          title={hasLoadingError ? "Wishlist Error" : "Wishlist Not Found"}
+        >
           <div className="wishlist-content">
+            {pageError && (
+              <div className="notice notice--error" role="alert">
+                <span>{pageError}</span>
+
+                <button
+                  className="notice-action"
+                  type="button"
+                  onClick={retryLoading}
+                >
+                  Try again
+                </button>
+              </div>
+            )}
+
             <div className="not-found-content">
               <span className="not-found-icon" aria-hidden="true">
-                ?
+                {hasLoadingError ? "!" : "?"}
               </span>
 
-              <h2>This wishlist could not be found.</h2>
+              <h2>
+                {hasLoadingError
+                  ? "The wishlist is temporarily unavailable."
+                  : "This wishlist could not be found."}
+              </h2>
 
-              <p>Check the link or return to the public wishlist directory.</p>
+              <p>
+                {hasLoadingError
+                  ? "Try loading the wishlist again or return to the public directory."
+                  : "Check the link or return to the public wishlist directory."}
+              </p>
 
               <Link className="retro-button directory-link" to="/">
                 Return home
@@ -269,30 +393,29 @@ function WishlistPage() {
 
   return (
     <main className="desktop">
-      <MacWindow title={wishlist?.title ?? "Wishlist"}>
+      <MacWindow title={wishlistTitle}>
         <div className="wishlist-content">
           <nav className="page-navigation" aria-label="Page navigation">
             <Link className="back-link" to="/">
               ← Wishlist directory
             </Link>
 
-            {wishlist?.visibility === "unlisted" && (
+            {wishlistVisibility === "unlisted" && (
               <span className="privacy-label">Unlisted</span>
             )}
           </nav>
 
-          {wishlist && (
-            <section className="intro">
-              <div className="intro-icon" aria-hidden="true">
-                {wishlist.icon}
-              </div>
+          <section className="intro">
+            <div className="intro-icon" aria-hidden="true">
+              {wishlistIcon}
+            </div>
 
-              <div>
-                <h2>{wishlist.title}</h2>
-                <p>{wishlist.description}</p>
-              </div>
-            </section>
-          )}
+            <div>
+              <h2>{wishlistTitle}</h2>
+
+              <p>{wishlistDescription}</p>
+            </div>
+          </section>
 
           {pageError && (
             <div className="notice notice--error" role="alert">
@@ -308,7 +431,7 @@ function WishlistPage() {
             </div>
           )}
 
-          {wishlist && gifts.length > 0 && (
+          {gifts.length > 0 && (
             <div className="toolbar" aria-label="Wishlist summary">
               <span>
                 {gifts.length} {gifts.length === 1 ? "gift" : "gifts"}
@@ -321,7 +444,7 @@ function WishlistPage() {
             </div>
           )}
 
-          {wishlist && gifts.length === 0 && !pageError && (
+          {gifts.length === 0 && !pageError && (
             <div className="state-window">
               <span className="state-icon" aria-hidden="true">
                 □
@@ -331,10 +454,10 @@ function WishlistPage() {
             </div>
           )}
 
-          {wishlist && gifts.length > 0 && (
+          {gifts.length > 0 && (
             <section
               className="gift-grid"
-              aria-label={`${wishlist.title} gifts`}
+              aria-label={`${wishlistTitle} gifts`}
             >
               {gifts.map((gift) => (
                 <GiftCard
@@ -357,7 +480,7 @@ function WishlistPage() {
         </div>
       </MacWindow>
 
-      {selectedGift && (
+      {selectedGift !== null && (
         <ReservationDialog
           gift={selectedGift}
           isSubmitting={updatingGiftId === selectedGift.id}
