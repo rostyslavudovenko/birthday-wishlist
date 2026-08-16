@@ -22,8 +22,8 @@ jobs:
     steps:
       - name: Check required secrets
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_URL: ${{ secrets['SUPABASE_URL'] }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets['SUPABASE_PUBLISHABLE_KEY'] }}
         run: |
           if [ -z "$SUPABASE_URL" ]; then
             echo "::error::SUPABASE_URL is not configured."
@@ -37,8 +37,8 @@ jobs:
 
       - name: Query featured wishlists
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_URL: ${{ secrets['SUPABASE_URL'] }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets['SUPABASE_PUBLISHABLE_KEY'] }}
         run: |
           response_file="$(mktemp)"
           trap 'rm -f "$response_file"' EXIT
