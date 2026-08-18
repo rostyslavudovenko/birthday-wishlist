@@ -1,0 +1,26 @@
+{
+  "slug": "sample-birthday-list",
+  "title": "Sample Birthday Wishlist",
+  "ownerName": "Sample Person",
+  "description": "A synthetic wishlist used to demonstrate the importer format.",
+  "icon": "🎂",
+  "visibility": "unlisted",
+  "isFeatured": false,
+  "displayOrder": 100,
+  "gifts": [
+    {
+      "name": "Mechanical Keyboard",
+      "description": "A compact wireless keyboard for everyday work.",
+      "price": "Around €100",
+      "image": "⌨",
+      "storeUrl": null
+    },
+    {
+      "name": "Coffee Grinder",
+      "description": "A small manual grinder for fresh coffee.",
+      "price": "Around €45",
+      "image": "https://example.com/images/coffee-grinder.webp",
+      "storeUrl": "https://example.com/products/coffee-grinder"
+    }
+  ]
+}

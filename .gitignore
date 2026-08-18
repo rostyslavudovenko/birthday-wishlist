@@ -27,3 +27,7 @@ dist-ssr
 backups/
 *.backup.sql
 *.backup.dump
+
+# Private wishlist definitions and importer secrets
+wishlists/private/
+.env.wishlist-importer
