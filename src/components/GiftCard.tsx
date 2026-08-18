@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Gift } from "../types/gift";
 
 type GiftCardProps = {
@@ -7,6 +8,45 @@ type GiftCardProps = {
   onChoose: (gift: Gift) => void;
   onRelease: (giftId: number) => void;
 };
+
+type GiftVisualProps = {
+  gift: Gift;
+};
+
+function isImageUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+
+    return url.protocol === "https:" || url.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
+function GiftVisual({ gift }: GiftVisualProps) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const hasImageUrl = isImageUrl(gift.image);
+
+  if (hasImageUrl && !imageFailed) {
+    return (
+      <img
+        className="gift-image__photo"
+        src={gift.image}
+        alt={gift.name}
+        loading="lazy"
+        onError={() => setImageFailed(true)}
+      />
+    );
+  }
+
+  const fallbackIcon = hasImageUrl ? "🎁" : gift.image;
+
+  return (
+    <span className="gift-image__icon" aria-hidden="true">
+      {fallbackIcon}
+    </span>
+  );
+}
 
 function GiftCard({
   gift,
@@ -51,8 +91,8 @@ function GiftCard({
       </header>
 
       <div className="gift-content">
-        <div className="gift-image" aria-hidden="true">
-          {gift.image}
+        <div className="gift-image">
+          <GiftVisual key={gift.image} gift={gift} />
         </div>
 
         <div className="gift-details">
