@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/wishlist.schema.json",
+  "title": "Birthday wishlist import definition",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "slug",
+    "title",
+    "ownerName",
+    "description",
+    "icon",
+    "visibility",
+    "isFeatured",
+    "displayOrder",
+    "gifts"
+  ],
+  "properties": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "ownerName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "icon": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20
+    },
+    "visibility": {
+      "type": "string",
+      "enum": ["public", "unlisted"]
+    },
+    "isFeatured": {
+      "type": "boolean"
+    },
+    "displayOrder": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "gifts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/gift"
+      }
+    }
+  },
+  "$defs": {
+    "gift": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "description", "price", "image", "storeUrl"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "price": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "image": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "storeUrl": {
+          "type": ["string", "null"],
+          "format": "uri",
+          "maxLength": 2048
+        }
+      }
+    }
+  }
+}
