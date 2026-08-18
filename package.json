@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "wishlist:validate": "node scripts/wishlist-importer/validate-wishlist.mjs"
+    "wishlist:validate": "node scripts/wishlist-importer/validate-wishlist.mjs",
+    "wishlist:preflight": "node scripts/wishlist-importer/preflight-wishlist.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.2",
