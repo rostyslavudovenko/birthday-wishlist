@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
+import AppFooter from "../components/AppFooter";
 import MacWindow from "../components/MacWindow";
 import { fetchFeaturedWishlists } from "../services/wishlists";
 import type { FeaturedWishlist } from "../types/wishlist";
@@ -151,14 +152,7 @@ function HomePage() {
             </section>
           )}
 
-          <footer className="wishlist-footer">
-            <span aria-hidden="true">♥</span>
-
-            <p>
-              Private family wishlists are available only through their direct
-              links.
-            </p>
-          </footer>
+          <AppFooter />
         </div>
       </MacWindow>
     </main>

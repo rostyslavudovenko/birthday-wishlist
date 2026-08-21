@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { Link, useParams } from "react-router";
+import AppFooter from "../components/AppFooter";
 import GiftCard from "../components/GiftCard";
 import MacWindow from "../components/MacWindow";
 import ReservationDialog from "../components/ReservationDialog";
@@ -472,11 +473,7 @@ function WishlistPage() {
             </section>
           )}
 
-          <footer className="wishlist-footer">
-            <span aria-hidden="true">♥</span>
-
-            <p>Thank you for making this birthday special.</p>
-          </footer>
+          <AppFooter />
         </div>
       </MacWindow>
 

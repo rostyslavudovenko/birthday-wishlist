@@ -292,11 +292,7 @@
   cursor: not-allowed;
 }
 
-.wishlist-footer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+.app-footer {
   margin-top: 32px;
   padding-top: 24px;
   border-top: 1px solid var(--black);
@@ -304,8 +300,25 @@
   text-align: center;
 }
 
-.wishlist-footer p {
+.app-footer p {
   margin: 0;
+}
+
+.app-footer a {
+  color: var(--black);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.app-footer a:hover {
+  color: var(--dark-gray);
+}
+
+.app-footer a:focus-visible {
+  outline: 3px dotted var(--black);
+  outline-offset: 4px;
 }
 
 .notice {
