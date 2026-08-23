@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import AppMenu from "./AppMenu";
 
 type MacWindowProps = {
   title: string;
@@ -37,6 +38,8 @@ function MacWindow({ title, children, className = "" }: MacWindowProps) {
           aria-hidden="true"
         />
       </header>
+
+      <AppMenu />
 
       {children}
     </section>
