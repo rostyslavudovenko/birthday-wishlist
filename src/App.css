@@ -226,18 +226,62 @@
   line-height: 1.3;
 }
 
-.gift-details p {
+.gift-details > p {
   margin: 0 0 12px;
   color: var(--muted-text);
   font-size: 0.9rem;
   line-height: 1.5;
 }
 
-.gift-details .gift-price {
+.gift-purchase-details {
   margin-top: auto;
+}
+
+.gift-details .gift-price {
+  margin: 0 0 8px;
   color: var(--black);
   font-size: 0.82rem;
   font-weight: 700;
+}
+
+.gift-store-link-row {
+  display: flex;
+  min-height: 34px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.gift-store-link {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  gap: 5px;
+  color: var(--black);
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.gift-store-link__label {
+  padding-bottom: 2px;
+  border-bottom: 1px solid currentColor;
+}
+
+.gift-store-link__icon {
+  position: relative;
+  top: 1px;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.gift-store-link:hover {
+  color: var(--dark-gray);
+}
+
+.gift-store-link:focus-visible {
+  outline: 3px dotted var(--black);
+  outline-offset: 4px;
 }
 
 .status-badge {
