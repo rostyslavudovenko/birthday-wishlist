@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "wishlist:validate": "node scripts/wishlist-importer/validate-wishlist.mjs",
     "wishlist:preflight": "node scripts/wishlist-importer/preflight-wishlist.mjs",
-    "wishlist:import": "node scripts/wishlist-importer/import-wishlist.mjs"
+    "wishlist:import": "node scripts/wishlist-importer/import-wishlist.mjs",
+    "wishlist:export": "node scripts/wishlist-importer/export-wishlist.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.2",
