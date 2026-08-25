@@ -9,6 +9,7 @@
   "displayOrder": 100,
   "gifts": [
     {
+      "key": "mechanical-keyboard",
       "name": "Mechanical Keyboard",
       "description": "A compact wireless keyboard for everyday work.",
       "price": "Around €100",
@@ -16,6 +17,7 @@
       "storeUrl": null
     },
     {
+      "key": "coffee-grinder",
       "name": "Coffee Grinder",
       "description": "A small manual grinder for fresh coffee.",
       "price": "Around €45",

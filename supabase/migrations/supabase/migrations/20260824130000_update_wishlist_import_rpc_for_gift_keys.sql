@@ -1,5 +1,4 @@
--- Admin-only atomic wishlist import RPC.
--- Current definition includes stable gift keys.
+-- Update the admin-only atomic wishlist import RPC to require stable gift keys.
 
 begin;
 

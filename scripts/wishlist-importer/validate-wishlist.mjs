@@ -2,6 +2,8 @@ import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import process from "node:process";
 
+const stableKeyPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
 const wishlistFields = [
   "slug",
   "title",
@@ -14,7 +16,7 @@ const wishlistFields = [
   "gifts",
 ];
 
-const giftFields = ["name", "description", "price", "image", "storeUrl"];
+const giftFields = ["key", "name", "description", "price", "image", "storeUrl"];
 
 function isRecord(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -23,7 +25,7 @@ function isRecord(value) {
 function hasOnlyFields(value, allowedFields, path, errors) {
   for (const field of Object.keys(value)) {
     if (!allowedFields.includes(field)) {
-      errors.push(`${path}.${field}: unknown field.`);
+      errors.push(`path.{field}: unknown field.`);
     }
   }
 }
@@ -67,8 +69,16 @@ function validateGift(gift, index, errors) {
 
   for (const field of giftFields) {
     if (!(field in gift)) {
-      errors.push(`${path}.${field}: required field is missing.`);
+      errors.push(`path.{field}: required field is missing.`);
     }
+  }
+
+  validateString(gift.key, `${path}.key`, errors, { maxLength: 120 });
+
+  if (typeof gift.key === "string" && !stableKeyPattern.test(gift.key)) {
+    errors.push(
+      `${path}.key: use lowercase letters, numbers, and single hyphens only.`,
+    );
   }
 
   validateString(gift.name, `${path}.name`, errors, { maxLength: 160 });
@@ -102,10 +112,7 @@ function validateWishlist(value) {
 
   validateString(value.slug, "wishlist.slug", errors, { maxLength: 120 });
 
-  if (
-    typeof value.slug === "string" &&
-    !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value.slug)
-  ) {
+  if (typeof value.slug === "string" && !stableKeyPattern.test(value.slug)) {
     errors.push(
       "wishlist.slug: use lowercase letters, numbers, and single hyphens only.",
     );
@@ -140,6 +147,25 @@ function validateWishlist(value) {
     errors.push("wishlist.gifts: must contain at least one gift.");
   } else {
     value.gifts.forEach((gift, index) => validateGift(gift, index, errors));
+
+    const giftKeyIndexes = new Map();
+
+    value.gifts.forEach((gift, index) => {
+      if (!isRecord(gift) || typeof gift.key !== "string") {
+        return;
+      }
+
+      const previousIndex = giftKeyIndexes.get(gift.key);
+
+      if (previousIndex !== undefined) {
+        errors.push(
+          `gifts[index].key:duplicatesgifts[{previousIndex}].key "${gift.key}".`,
+        );
+        return;
+      }
+
+      giftKeyIndexes.set(gift.key, index);
+    });
   }
 
   return errors;

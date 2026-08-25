@@ -177,7 +177,7 @@ async function main() {
   console.log("Wishlist created successfully.");
   console.log(`Wishlist ID: ${result.wishlist_id}`);
   console.log(`Created gifts: ${result.created_gift_count}`);
-  console.log(`URL: ${configuration.siteUrl}/w/${wishlist.slug}`);
+  console.log(`URL: configuration.siteUrl/w/{wishlist.slug}`);
 }
 
 try {
