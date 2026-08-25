@@ -40,13 +40,12 @@ async function loadConfiguration() {
   let fileEnvironment;
 
   try {
-    const content = await readFile(environmentPath, "utf8");
-    fileEnvironment = parseEnvironmentFile(content);
+    fileEnvironment = parseEnvironmentFile(
+      await readFile(environmentPath, "utf8"),
+    );
   } catch (error) {
     if (error?.code === "ENOENT") {
-      throw new Error(
-        ".env.wishlist-importer was not found. Create it from the provided example.",
-      );
+      throw new Error(".env.wishlist-importer was not found.");
     }
 
     throw error;
@@ -58,13 +57,29 @@ async function loadConfiguration() {
 
   if (!url || !secretKey) {
     throw new Error(
-      "SUPABASE_URL and SUPABASE_SECRET_KEY are required in " +
-        ".env.wishlist-importer.",
+      "SUPABASE_URL and SUPABASE_SECRET_KEY are required in .env.wishlist-importer.",
     );
   }
 
+  let normalizedUrl;
+
+  try {
+    normalizedUrl = new URL(url);
+  } catch {
+    throw new Error(
+      "SUPABASE_URL in .env.wishlist-importer must be a valid absolute URL.",
+    );
+  }
+
+  if (
+    normalizedUrl.protocol !== "https:" &&
+    normalizedUrl.protocol !== "http:"
+  ) {
+    throw new Error("SUPABASE_URL must use http:// or https://.");
+  }
+
   return {
-    url: url.replace(/\/+$/u, ""),
+    url: normalizedUrl.toString().replace(/\/+$/u, ""),
     secretKey,
   };
 }
@@ -74,7 +89,6 @@ function runValidation(inputPath) {
     process.cwd(),
     "scripts/wishlist-importer/validate-wishlist.mjs",
   );
-
   const result = spawnSync(process.execPath, [validatorPath, inputPath], {
     encoding: "utf8",
     stdio: "inherit",
@@ -88,35 +102,38 @@ function runValidation(inputPath) {
 }
 
 async function requestRows(path, configuration) {
-  const response = await fetch(`${configuration.url}/rest/v1/${path}`, {
+  const requestUrl = new URL("rest/v1/" + path, configuration.url + "/");
+  const response = await fetch(requestUrl, {
     headers: {
       apikey: configuration.secretKey,
-      Authorization: `Bearer ${configuration.secretKey}`,
+      Authorization: "Bearer " + configuration.secretKey,
       Accept: "application/json",
     },
   });
 
   if (!response.ok) {
-    const responseText = await response.text();
-
     throw new Error(
-      `Supabase sync preview failed (${response.status}): ${responseText}`,
+      "Supabase request failed (" +
+        response.status +
+        "): " +
+        (await response.text()),
     );
   }
 
   const data = await response.json();
 
   if (!Array.isArray(data)) {
-    throw new Error("Supabase returned an unexpected sync preview response.");
+    throw new Error("Supabase returned an unexpected response.");
   }
 
   return data;
 }
 
 async function fetchCurrentWishlist(slug, configuration) {
-  const encodedSlug = encodeURIComponent(slug);
   const rows = await requestRows(
-    `wishlists?select=id,slug,title,owner_name,description,icon,visibility,is_featured,display_order&slug=eq.${encodedSlug}&limit=1`,
+    "wishlists?select=id,slug,title,owner_name,description,icon,visibility,is_featured,display_order&slug=eq." +
+      encodeURIComponent(slug) +
+      "&limit=1",
     configuration,
   );
 
@@ -125,7 +142,9 @@ async function fetchCurrentWishlist(slug, configuration) {
 
 async function fetchCurrentGifts(wishlistId, configuration) {
   return requestRows(
-    `gifts?select=gift_key,name,description,price,image,store_url,display_order,is_visible,reserved_at&wishlist_id=eq.${wishlistId}&order=display_order.asc,id.asc`,
+    "gifts?select=gift_key,name,description,price,image,store_url,display_order,is_visible,reserved_at&wishlist_id=eq." +
+      wishlistId +
+      "&order=display_order.asc,id.asc",
     configuration,
   );
 }
@@ -160,92 +179,78 @@ function buildGiftChanges(currentGifts, nextGifts) {
     currentGifts.map((gift) => [gift.gift_key, gift]),
   );
   const nextByKey = new Map(nextGifts.map((gift) => [gift.key, gift]));
-
-  const additions = [];
-  const updates = [];
-  const reorders = [];
-  const hides = [];
-  const restores = [];
-  const unchanged = [];
+  const changes = {
+    additions: [],
+    updates: [],
+    reorders: [],
+    hides: [],
+    restores: [],
+    unchanged: [],
+  };
 
   nextGifts.forEach((nextGift, index) => {
-    const nextDisplayOrder = (index + 1) * 10;
+    const nextOrder = (index + 1) * 10;
     const currentGift = currentByKey.get(nextGift.key);
 
     if (!currentGift) {
-      additions.push({
-        key: nextGift.key,
-        name: nextGift.name,
-        displayOrder: nextDisplayOrder,
-      });
+      changes.additions.push({ ...nextGift, displayOrder: nextOrder });
       return;
     }
 
     if (!currentGift.is_visible) {
-      restores.push({ key: nextGift.key, name: nextGift.name });
+      changes.restores.push({ key: nextGift.key, name: nextGift.name });
     }
 
-    const changedFields = [];
-    compareField(changedFields, "name", currentGift.name, nextGift.name);
+    const fields = [];
+
+    compareField(fields, "name", currentGift.name, nextGift.name);
     compareField(
-      changedFields,
+      fields,
       "description",
       currentGift.description,
       nextGift.description,
     );
-    compareField(changedFields, "price", currentGift.price, nextGift.price);
-    compareField(changedFields, "image", currentGift.image, nextGift.image);
-    compareField(
-      changedFields,
-      "store URL",
-      currentGift.store_url,
-      nextGift.storeUrl,
-    );
+    compareField(fields, "price", currentGift.price, nextGift.price);
+    compareField(fields, "image", currentGift.image, nextGift.image);
+    compareField(fields, "store URL", currentGift.store_url, nextGift.storeUrl);
 
-    if (changedFields.length > 0) {
-      updates.push({
+    if (fields.length > 0) {
+      changes.updates.push({
         key: nextGift.key,
         name: nextGift.name,
-        changedFields,
+        fields,
       });
     }
 
-    if (currentGift.display_order !== nextDisplayOrder) {
-      reorders.push({
+    if (currentGift.display_order !== nextOrder) {
+      changes.reorders.push({
         key: nextGift.key,
         name: nextGift.name,
         currentOrder: currentGift.display_order,
-        nextOrder: nextDisplayOrder,
+        nextOrder,
       });
     }
 
     if (
       currentGift.is_visible &&
-      changedFields.length === 0 &&
-      currentGift.display_order === nextDisplayOrder
+      fields.length === 0 &&
+      currentGift.display_order === nextOrder
     ) {
-      unchanged.push({ key: nextGift.key, name: nextGift.name });
+      changes.unchanged.push({ key: nextGift.key, name: nextGift.name });
     }
   });
 
-  currentGifts.forEach((currentGift) => {
-    if (currentGift.is_visible && !nextByKey.has(currentGift.gift_key)) {
-      hides.push({
-        key: currentGift.gift_key,
-        name: currentGift.name,
-        isReserved: currentGift.reserved_at !== null,
+  currentGifts.forEach((gift) => {
+    if (gift.is_visible && !nextByKey.has(gift.gift_key)) {
+      changes.hides.push({
+        key: gift.gift_key,
+        name: gift.name,
+        isReserved: gift.reserved_at !== null,
       });
     }
   });
 
-  return {
-    additions,
-    updates,
-    reorders,
-    hides,
-    restores,
-    unchanged,
-  };
+  return changes;
 }
 
 function formatValue(value) {
@@ -253,95 +258,147 @@ function formatValue(value) {
     return "null";
   }
 
-  if (typeof value === "string" && value.length > 90) {
-    return `${value.slice(0, 87)}...`;
-  }
-
-  return JSON.stringify(value);
+  const output = JSON.stringify(value);
+  return output.length > 90 ? output.slice(0, 87) + "..." : output;
 }
 
-function printWishlistChanges(changes) {
+function printPreview(slug, wishlistChanges, giftChanges) {
+  console.log('\nSync preview for "' + slug + '"\n');
   console.log("Wishlist changes");
   console.log("----------------");
 
-  if (changes.length === 0) {
+  if (wishlistChanges.length === 0) {
     console.log("No metadata changes.");
-    return;
   }
 
-  for (const change of changes) {
+  for (const change of wishlistChanges) {
     console.log(
-      `~ ${change.label}: ${formatValue(change.currentValue)} -> ${formatValue(change.nextValue)}`,
+      "~ " +
+        change.label +
+        ": " +
+        formatValue(change.currentValue) +
+        " -> " +
+        formatValue(change.nextValue),
     );
   }
-}
 
-function printGiftChanges(changes) {
-  console.log("");
-  console.log("Gift changes");
+  console.log("\nGift changes");
   console.log("------------");
 
-  for (const gift of changes.additions) {
-    console.log(`+ ADD [${gift.key}] ${gift.name} at ${gift.displayOrder}`);
+  for (const gift of giftChanges.additions) {
+    console.log("+ ADD [" + gift.key + "] " + gift.name);
   }
 
-  for (const gift of changes.updates) {
-    console.log(`~ UPDATE [${gift.key}] ${gift.name}`);
+  for (const gift of giftChanges.updates) {
+    console.log("~ UPDATE [" + gift.key + "] " + gift.name);
 
-    for (const field of gift.changedFields) {
+    for (const field of gift.fields) {
       console.log(
-        `    ${field.label}: ${formatValue(field.currentValue)} -> ${formatValue(field.nextValue)}`,
+        "    " +
+          field.label +
+          ": " +
+          formatValue(field.currentValue) +
+          " -> " +
+          formatValue(field.nextValue),
       );
     }
   }
 
-  for (const gift of changes.reorders) {
+  for (const gift of giftChanges.reorders) {
     console.log(
-      `↕ REORDER [${gift.key}] ${gift.name}: ${gift.currentOrder} -> ${gift.nextOrder}`,
+      "REORDER [" +
+        gift.key +
+        "] " +
+        gift.name +
+        ": " +
+        gift.currentOrder +
+        " -> " +
+        gift.nextOrder,
     );
   }
 
-  for (const gift of changes.restores) {
-    console.log(`↺ RESTORE [${gift.key}] ${gift.name}`);
+  for (const gift of giftChanges.restores) {
+    console.log("RESTORE [" + gift.key + "] " + gift.name);
   }
 
-  for (const gift of changes.hides) {
+  for (const gift of giftChanges.hides) {
     const reservationNote = gift.isReserved ? " (currently reserved)" : "";
-    console.log(`- HIDE [${gift.key}] gift.name{reservationNote}`);
+    console.log("- HIDE [" + gift.key + "] " + gift.name + reservationNote);
   }
 
-  if (
-    changes.additions.length === 0 &&
-    changes.updates.length === 0 &&
-    changes.reorders.length === 0 &&
-    changes.restores.length === 0 &&
-    changes.hides.length === 0
-  ) {
-    console.log("No gift changes.");
-  }
-
-  console.log("");
-  console.log(`Unchanged gifts: ${changes.unchanged.length}`);
-}
-
-function countChanges(wishlistChanges, giftChanges) {
-  return (
+  const total =
     wishlistChanges.length +
     giftChanges.additions.length +
     giftChanges.updates.length +
     giftChanges.reorders.length +
     giftChanges.hides.length +
-    giftChanges.restores.length
+    giftChanges.restores.length;
+
+  console.log("\nUnchanged gifts: " + giftChanges.unchanged.length);
+  console.log("Planned changes: " + total);
+
+  return total;
+}
+
+async function applySync(definition, configuration, allowHideReserved) {
+  const requestUrl = new URL(
+    "rest/v1/rpc/sync_wishlist_with_gifts",
+    configuration.url + "/",
   );
+  const response = await fetch(requestUrl, {
+    method: "POST",
+    headers: {
+      apikey: configuration.secretKey,
+      Authorization: "Bearer " + configuration.secretKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      p_slug: definition.slug,
+      p_title: definition.title,
+      p_owner_name: definition.ownerName,
+      p_description: definition.description,
+      p_icon: definition.icon,
+      p_visibility: definition.visibility,
+      p_is_featured: definition.isFeatured,
+      p_display_order: definition.displayOrder,
+      p_gifts: definition.gifts,
+      p_allow_hide_reserved: allowHideReserved,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      "Supabase sync failed (" +
+        response.status +
+        "): " +
+        (await response.text()),
+    );
+  }
+
+  const data = await response.json();
+
+  if (!Array.isArray(data) || data.length !== 1) {
+    throw new Error("Supabase returned an unexpected sync result.");
+  }
+
+  return data[0];
 }
 
 async function main() {
   const inputPath = process.argv[2];
+  const confirm = process.argv.includes("--confirm");
+  const allowHideReserved = process.argv.includes("--allow-hide-reserved");
 
   if (!inputPath) {
-    console.error("Usage: npm run wishlist:sync -- <path-to-wishlist.json>");
+    console.error(
+      "Usage: npm run wishlist:sync -- <path> [--confirm] [--allow-hide-reserved]",
+    );
     process.exitCode = 1;
     return;
+  }
+
+  if (allowHideReserved && !confirm) {
+    throw new Error("--allow-hide-reserved requires --confirm.");
   }
 
   if (!runValidation(inputPath)) {
@@ -349,8 +406,9 @@ async function main() {
     return;
   }
 
-  const absolutePath = resolve(process.cwd(), inputPath);
-  const definition = JSON.parse(await readFile(absolutePath, "utf8"));
+  const definition = JSON.parse(
+    await readFile(resolve(process.cwd(), inputPath), "utf8"),
+  );
   const configuration = await loadConfiguration();
   const currentWishlist = await fetchCurrentWishlist(
     definition.slug,
@@ -359,7 +417,9 @@ async function main() {
 
   if (!currentWishlist) {
     throw new Error(
-      `Wishlist "${definition.slug}" was not found. Use wishlist:import to create it.`,
+      'Wishlist "' +
+        definition.slug +
+        '" was not found. Use wishlist:import to create it.',
     );
   }
 
@@ -369,26 +429,47 @@ async function main() {
   );
   const wishlistChanges = buildWishlistChanges(currentWishlist, definition);
   const giftChanges = buildGiftChanges(currentGifts, definition.gifts);
-  const totalChanges = countChanges(wishlistChanges, giftChanges);
+  const totalChanges = printPreview(
+    definition.slug,
+    wishlistChanges,
+    giftChanges,
+  );
 
-  console.log("");
-  console.log(`Sync preview for "${definition.slug}"`);
-  console.log("=".repeat(24 + definition.slug.length));
-  console.log("");
+  if (!confirm) {
+    console.log("Read-only preview complete. No data was written to Supabase.");
+    return;
+  }
 
-  printWishlistChanges(wishlistChanges);
-  printGiftChanges(giftChanges);
+  if (totalChanges === 0) {
+    console.log("Nothing to synchronize.");
+    return;
+  }
 
-  console.log("");
-  console.log(`Planned changes: ${totalChanges}`);
-  console.log("Read-only preview complete. No data was written to Supabase.");
+  const reservedHides = giftChanges.hides.filter((gift) => gift.isReserved);
+
+  if (reservedHides.length > 0 && !allowHideReserved) {
+    throw new Error(
+      "Sync would hide a reserved gift. Review the preview and rerun with " +
+        "--confirm --allow-hide-reserved only if this is intentional.",
+    );
+  }
+
+  console.log("\nApplying atomic synchronization...");
+  const result = await applySync(definition, configuration, allowHideReserved);
+
+  console.log("Wishlist synchronized successfully.");
+  console.log("Added: " + result.added_count);
+  console.log("Updated: " + result.updated_count);
+  console.log("Hidden: " + result.hidden_count);
+  console.log("Restored: " + result.restored_count);
 }
 
 try {
   await main();
 } catch (error) {
-  const message = error instanceof Error ? error.message : String(error);
-
-  console.error(`Wishlist sync preview failed: ${message}`);
+  console.error(
+    "Wishlist sync failed: " +
+      (error instanceof Error ? error.message : String(error)),
+  );
   process.exitCode = 1;
 }
