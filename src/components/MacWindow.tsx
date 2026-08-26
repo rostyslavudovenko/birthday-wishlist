@@ -15,8 +15,6 @@ function MacWindow({ title, children, className = "" }: MacWindowProps) {
   return (
     <section className={windowClassName}>
       <header className="window-title-bar window-title-bar--main">
-        <span className="window-control" aria-hidden="true" />
-
         <div className="title-lines" aria-hidden="true">
           <span />
           <span />
@@ -32,11 +30,6 @@ function MacWindow({ title, children, className = "" }: MacWindowProps) {
           <span />
           <span />
         </div>
-
-        <span
-          className="window-control window-control--right"
-          aria-hidden="true"
-        />
       </header>
 
       <AppMenu />

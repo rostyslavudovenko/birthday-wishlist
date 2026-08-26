@@ -92,8 +92,6 @@ function ReservationDialog({
         aria-describedby="reservation-description"
       >
         <header className="window-title-bar">
-          <span className="window-control" aria-hidden="true" />
-
           <div className="title-lines" aria-hidden="true">
             <span />
             <span />
@@ -109,11 +107,6 @@ function ReservationDialog({
             <span />
             <span />
           </div>
-
-          <span
-            className="window-control window-control--right"
-            aria-hidden="true"
-          />
         </header>
 
         <form className="dialog-content" onSubmit={handleSubmit}>

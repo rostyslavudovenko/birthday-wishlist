@@ -22,7 +22,7 @@
 .window-title-bar {
   position: relative;
   display: grid;
-  grid-template-columns: auto minmax(16px, 1fr) auto minmax(16px, 1fr) auto;
+  grid-template-columns: minmax(16px, 1fr) auto minmax(16px, 1fr);
   align-items: center;
   gap: 8px;
   min-height: 34px;
@@ -52,40 +52,6 @@
 
 .window-title-bar--main h1 {
   font-size: 0.95rem;
-}
-
-.window-control {
-  display: block;
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--black);
-  background: var(--surface);
-  box-shadow: inset 2px 2px 0 var(--white);
-}
-
-.window-control--right {
-  position: relative;
-}
-
-.window-control--right::before,
-.window-control--right::after {
-  position: absolute;
-  content: "";
-  background: var(--black);
-}
-
-.window-control--right::before {
-  top: 3px;
-  right: 2px;
-  left: 2px;
-  height: 2px;
-}
-
-.window-control--right::after {
-  top: 2px;
-  right: 3px;
-  width: 2px;
-  height: 5px;
 }
 
 .title-lines {
@@ -635,11 +601,7 @@
   }
 
   .window-title-bar {
-    grid-template-columns: auto minmax(8px, 1fr) auto minmax(8px, 1fr);
-  }
-
-  .window-title-bar .window-control--right {
-    display: none;
+    grid-template-columns: minmax(8px, 1fr) auto minmax(8px, 1fr);
   }
 
   .intro {

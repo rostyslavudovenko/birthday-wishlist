@@ -98,8 +98,6 @@ function HomePage() {
               {wishlists.map((wishlist) => (
                 <article className="directory-window" key={wishlist.slug}>
                   <header className="window-title-bar">
-                    <span className="window-control" aria-hidden="true" />
-
                     <div className="title-lines" aria-hidden="true">
                       <span />
                       <span />
@@ -115,11 +113,6 @@ function HomePage() {
                       <span />
                       <span />
                     </div>
-
-                    <span
-                      className="window-control window-control--right"
-                      aria-hidden="true"
-                    />
                   </header>
 
                   <div className="directory-content">

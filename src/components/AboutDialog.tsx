@@ -51,8 +51,6 @@ function AboutDialog({ onClose }: AboutDialogProps) {
         aria-describedby="about-dialog-description"
       >
         <header className="window-title-bar">
-          <span className="window-control" aria-hidden="true" />
-
           <div className="title-lines" aria-hidden="true">
             <span />
             <span />
@@ -68,11 +66,6 @@ function AboutDialog({ onClose }: AboutDialogProps) {
             <span />
             <span />
           </div>
-
-          <span
-            className="window-control window-control--right"
-            aria-hidden="true"
-          />
         </header>
 
         <div className="about-dialog__content">

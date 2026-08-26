@@ -66,8 +66,6 @@ function GiftCard({
   return (
     <article className="gift-window">
       <header className="window-title-bar">
-        <span className="window-control" aria-hidden="true" />
-
         <div className="title-lines" aria-hidden="true">
           <span />
           <span />
@@ -83,11 +81,6 @@ function GiftCard({
           <span />
           <span />
         </div>
-
-        <span
-          className="window-control window-control--right"
-          aria-hidden="true"
-        />
       </header>
 
       <div className="gift-content">
