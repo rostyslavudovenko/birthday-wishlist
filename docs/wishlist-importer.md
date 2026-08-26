@@ -232,6 +232,17 @@ Emoji or short text icon displayed in the interface.
 "icon": "🎂"
 ```
 
+### `theme`
+
+Controls the wishlist's visual presentation. Supported values are:
+
+```text
+classic
+bubblegum
+```
+
+Use `classic` to preserve the original retro-Mac appearance.
+
 ### `visibility`
 
 Supported values:

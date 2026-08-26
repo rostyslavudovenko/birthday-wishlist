@@ -118,7 +118,7 @@ async function requestRows(path, configuration) {
 async function fetchWishlist(slug, configuration) {
   const encodedSlug = encodeURIComponent(slug);
   const rows = await requestRows(
-    `wishlists?select=id,slug,title,owner_name,description,icon,visibility,is_featured,display_order&slug=eq.${encodedSlug}&limit=1`,
+    `wishlists?select=id,slug,title,owner_name,description,icon,theme,visibility,is_featured,display_order&slug=eq.${encodedSlug}&limit=1`,
     configuration,
   );
 
@@ -141,6 +141,7 @@ function createDefinition(wishlist, gifts) {
     ownerName: wishlist.owner_name,
     description: wishlist.description,
     icon: wishlist.icon,
+    theme: wishlist.theme,
     visibility: wishlist.visibility,
     isFeatured: wishlist.is_featured,
     displayOrder: wishlist.display_order,

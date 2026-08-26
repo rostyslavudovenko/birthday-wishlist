@@ -1,4 +1,5 @@
 import { supabase } from "../lib/supabase";
+import { getWishlistTheme } from "../types/wishlist";
 import type {
   FeaturedWishlist,
   Wishlist,
@@ -11,12 +12,13 @@ type WishlistRow = {
   owner_name: string;
   description: string;
   icon: string;
+  theme: string | null;
   visibility: WishlistVisibility;
   gift_count: number;
   available_count: number;
 };
 
-type FeaturedWishlistRow = Omit<WishlistRow, "visibility">;
+type FeaturedWishlistRow = Omit<WishlistRow, "visibility" | "theme">;
 
 function mapWishlist(row: WishlistRow): Wishlist {
   return {
@@ -25,6 +27,7 @@ function mapWishlist(row: WishlistRow): Wishlist {
     ownerName: row.owner_name,
     description: row.description,
     icon: row.icon,
+    theme: getWishlistTheme(row.theme),
     visibility: row.visibility,
     giftCount: row.gift_count,
     availableCount: row.available_count,

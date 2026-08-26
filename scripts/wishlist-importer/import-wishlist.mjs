@@ -108,6 +108,7 @@ async function createWishlist(wishlist, configuration) {
         p_owner_name: wishlist.ownerName,
         p_description: wishlist.description,
         p_icon: wishlist.icon,
+        p_theme: wishlist.theme,
         p_visibility: wishlist.visibility,
         p_is_featured: wishlist.isFeatured,
         p_display_order: wishlist.displayOrder,

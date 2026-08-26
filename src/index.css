@@ -1,17 +1,31 @@
 :root {
   font-family: Geneva, Chicago, "Helvetica Neue", Helvetica, Arial, sans-serif;
-  color: #111;
-  background: #b8b8b8;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 
-  --black: #111;
-  --white: #fff;
-  --surface: #f5f3e9;
-  --light-gray: #d5d5d5;
-  --dark-gray: #676767;
-  --muted-text: #3e3e3e;
-  --window-shadow: 6px 6px 0 #111;
+  --color-canvas: #b8b8b8;
+  --color-canvas-dot: #929292;
+  --color-surface: #f5f3e9;
+  --color-surface-raised: #fff;
+  --color-surface-secondary: #d5d5d5;
+  --color-text: #111;
+  --color-text-muted: #3e3e3e;
+  --color-border: #111;
+  --color-accent: #111;
+  --color-accent-text: #fff;
+  --color-disabled: #676767;
+  --color-overlay: rgb(17 17 17 / 58%);
+
+  --black: var(--color-border);
+  --white: var(--color-surface-raised);
+  --surface: var(--color-surface);
+  --light-gray: var(--color-surface-secondary);
+  --dark-gray: var(--color-disabled);
+  --muted-text: var(--color-text-muted);
+  --window-shadow: 6px 6px 0 var(--color-border);
+
+  color: var(--color-text);
+  background: var(--color-canvas);
 }
 
 * {
@@ -27,14 +41,41 @@ body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
-  background-color: #b8b8b8;
+  background-color: var(--color-canvas);
   background-image:
-    radial-gradient(#929292 0.7px, transparent 0.7px),
-    radial-gradient(#929292 0.7px, #b8b8b8 0.7px);
+    radial-gradient(var(--color-canvas-dot) 0.7px, transparent 0.7px),
+    radial-gradient(var(--color-canvas-dot) 0.7px, var(--color-canvas) 0.7px);
   background-position:
     0 0,
     4px 4px;
   background-size: 8px 8px;
+}
+
+.wishlist-theme {
+  min-height: 100vh;
+  background-color: var(--color-canvas);
+  background-image:
+    radial-gradient(var(--color-canvas-dot) 0.7px, transparent 0.7px),
+    radial-gradient(var(--color-canvas-dot) 0.7px, var(--color-canvas) 0.7px);
+  background-position:
+    0 0,
+    4px 4px;
+  background-size: 8px 8px;
+}
+
+[data-wishlist-theme="bubblegum"] {
+  --color-canvas: #ff6b9d;
+  --color-canvas-dot: #d9507d;
+  --color-surface: #fff5f8;
+  --color-surface-raised: #fff5f8;
+  --color-surface-secondary: #ffe066;
+  --color-text: #111111;
+  --color-text-muted: #55303e;
+  --color-border: #111111;
+  --color-accent: #356cff;
+  --color-accent-text: #ffffff;
+  --color-disabled: #9b6b7b;
+  --color-overlay: rgb(17 17 17 / 58%);
 }
 
 button,
