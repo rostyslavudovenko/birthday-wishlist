@@ -31,6 +31,12 @@
   background: var(--surface);
 }
 
+[data-wishlist-theme="bubblegum"] .window-title-bar,
+[data-wishlist-theme="bubblegum"] .toolbar,
+[data-wishlist-theme="bubblegum"] .notice {
+  background: var(--color-surface-secondary);
+}
+
 .window-title-bar h1,
 .window-title-bar h2 {
   margin: 0;
@@ -279,6 +285,20 @@
   color: var(--dark-gray);
 }
 
+[data-wishlist-theme="bubblegum"] .gift-store-link,
+[data-wishlist-theme="bubblegum"] .app-footer a,
+[data-wishlist-theme="bubblegum"] .back-link,
+[data-wishlist-theme="bubblegum"] .about-dialog__links a {
+  color: var(--color-accent);
+}
+
+[data-wishlist-theme="bubblegum"] .gift-store-link:hover,
+[data-wishlist-theme="bubblegum"] .app-footer a:hover,
+[data-wishlist-theme="bubblegum"] .back-link:hover,
+[data-wishlist-theme="bubblegum"] .about-dialog__links a:hover {
+  color: var(--color-text-muted);
+}
+
 .gift-store-link:focus-visible {
   outline: 3px dotted var(--black);
   outline-offset: 4px;
@@ -334,6 +354,31 @@
   box-shadow: none;
   color: var(--dark-gray);
   cursor: not-allowed;
+}
+
+[data-wishlist-theme="bubblegum"] .retro-button:not(.retro-button--secondary) {
+  background: var(--color-accent);
+  color: var(--color-accent-text);
+}
+
+[data-wishlist-theme="bubblegum"] .retro-button:hover:not(:disabled):not(.retro-button--secondary) {
+  background: var(--color-surface-secondary);
+  color: var(--color-text);
+}
+
+[data-wishlist-theme="bubblegum"] .status-badge--reserved {
+  background: var(--color-accent);
+  color: var(--color-accent-text);
+}
+
+[data-wishlist-theme="bubblegum"] .intro-icon,
+[data-wishlist-theme="bubblegum"] .gift-image,
+[data-wishlist-theme="bubblegum"] .gift-image__photo,
+[data-wishlist-theme="bubblegum"] .directory-icon,
+[data-wishlist-theme="bubblegum"] .state-icon,
+[data-wishlist-theme="bubblegum"] .dialog-icon,
+[data-wishlist-theme="bubblegum"] .about-dialog__icon {
+  filter: none;
 }
 
 .app-footer {
@@ -673,7 +718,7 @@
   display: grid;
   overflow-y: auto;
   padding: 24px;
-  background: rgb(17 17 17 / 58%);
+  background: var(--color-overlay);
   inset: 0;
   place-items: center;
 }

@@ -10,6 +10,7 @@ const wishlistFields = [
   "ownerName",
   "description",
   "icon",
+  "theme",
   "visibility",
   "isFeatured",
   "displayOrder",
@@ -126,6 +127,10 @@ function validateWishlist(value) {
     maxLength: 500,
   });
   validateString(value.icon, "wishlist.icon", errors, { maxLength: 20 });
+
+  if (value.theme !== "classic" && value.theme !== "bubblegum") {
+    errors.push('wishlist.theme: must be either "classic" or "bubblegum".');
+  }
 
   if (value.visibility !== "public" && value.visibility !== "unlisted") {
     errors.push('wishlist.visibility: must be either "public" or "unlisted".');

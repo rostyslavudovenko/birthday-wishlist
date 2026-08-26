@@ -131,7 +131,7 @@ async function requestRows(path, configuration) {
 
 async function fetchCurrentWishlist(slug, configuration) {
   const rows = await requestRows(
-    "wishlists?select=id,slug,title,owner_name,description,icon,visibility,is_featured,display_order&slug=eq." +
+    "wishlists?select=id,slug,title,owner_name,description,icon,theme,visibility,is_featured,display_order&slug=eq." +
       encodeURIComponent(slug) +
       "&limit=1",
     configuration,
@@ -162,6 +162,7 @@ function buildWishlistChanges(current, next) {
   compareField(changes, "Owner name", current.owner_name, next.ownerName);
   compareField(changes, "Description", current.description, next.description);
   compareField(changes, "Icon", current.icon, next.icon);
+  compareField(changes, "Theme", current.theme, next.theme);
   compareField(changes, "Visibility", current.visibility, next.visibility);
   compareField(changes, "Featured", current.is_featured, next.isFeatured);
   compareField(
@@ -358,6 +359,7 @@ async function applySync(definition, configuration, allowHideReserved) {
       p_owner_name: definition.ownerName,
       p_description: definition.description,
       p_icon: definition.icon,
+      p_theme: definition.theme,
       p_visibility: definition.visibility,
       p_is_featured: definition.isFeatured,
       p_display_order: definition.displayOrder,

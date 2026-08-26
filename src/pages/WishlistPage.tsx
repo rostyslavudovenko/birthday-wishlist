@@ -50,6 +50,7 @@ function WishlistPage() {
   const wishlistTitle = wishlist?.title ?? "Wishlist";
   const wishlistDescription = wishlist?.description ?? "";
   const wishlistIcon = wishlist?.icon ?? "🎁";
+  const wishlistTheme = wishlist?.theme ?? "classic";
   const wishlistVisibility = wishlist?.visibility ?? null;
 
   const availableCount = gifts.filter((gift) => !gift.isReserved).length;
@@ -326,19 +327,21 @@ function WishlistPage() {
 
   if (isLoading) {
     return (
-      <main className="desktop">
-        <MacWindow title="Opening Wishlist">
-          <div className="wishlist-content">
-            <div className="state-window" role="status">
-              <span className="state-icon" aria-hidden="true">
-                ⌛
-              </span>
+      <div className="wishlist-theme" data-wishlist-theme={wishlistTheme}>
+        <main className="desktop">
+          <MacWindow title="Opening Wishlist">
+            <div className="wishlist-content">
+              <div className="state-window" role="status">
+                <span className="state-icon" aria-hidden="true">
+                  ⌛
+                </span>
 
-              <p>Loading wishlist...</p>
+                <p>Loading wishlist...</p>
+              </div>
             </div>
-          </div>
-        </MacWindow>
-      </main>
+          </MacWindow>
+        </main>
+      </div>
     );
   }
 
@@ -346,11 +349,12 @@ function WishlistPage() {
     const hasLoadingError = Boolean(pageError);
 
     return (
-      <main className="desktop">
-        <MacWindow
-          title={hasLoadingError ? "Wishlist Error" : "Wishlist Not Found"}
-        >
-          <div className="wishlist-content">
+      <div className="wishlist-theme" data-wishlist-theme={wishlistTheme}>
+        <main className="desktop">
+          <MacWindow
+            title={hasLoadingError ? "Wishlist Error" : "Wishlist Not Found"}
+          >
+            <div className="wishlist-content">
             {pageError && (
               <div className="notice notice--error" role="alert">
                 <span>{pageError}</span>
@@ -386,15 +390,17 @@ function WishlistPage() {
                 Return home
               </Link>
             </div>
-          </div>
-        </MacWindow>
-      </main>
+            </div>
+          </MacWindow>
+        </main>
+      </div>
     );
   }
 
   return (
-    <main className="desktop">
-      <MacWindow title={wishlistTitle}>
+    <div className="wishlist-theme" data-wishlist-theme={wishlistTheme}>
+      <main className="desktop">
+        <MacWindow title={wishlistTitle}>
         <div className="wishlist-content">
           <nav className="page-navigation" aria-label="Page navigation">
             <Link className="back-link" to="/">
@@ -475,9 +481,9 @@ function WishlistPage() {
 
           <AppFooter />
         </div>
-      </MacWindow>
+        </MacWindow>
 
-      {selectedGift !== null && (
+        {selectedGift !== null && (
         <ReservationDialog
           gift={selectedGift}
           isSubmitting={updatingGiftId === selectedGift.id}
@@ -485,8 +491,9 @@ function WishlistPage() {
           onCancel={closeReservationDialog}
           onConfirm={reserveGift}
         />
-      )}
-    </main>
+        )}
+      </main>
+    </div>
   );
 }
 

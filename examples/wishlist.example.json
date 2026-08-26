@@ -4,6 +4,7 @@
   "ownerName": "Sample Person",
   "description": "A synthetic wishlist used to demonstrate the importer format.",
   "icon": "🎂",
+  "theme": "classic",
   "visibility": "unlisted",
   "isFeatured": false,
   "displayOrder": 100,

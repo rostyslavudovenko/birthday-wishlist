@@ -10,6 +10,7 @@
     "ownerName",
     "description",
     "icon",
+    "theme",
     "visibility",
     "isFeatured",
     "displayOrder",
@@ -41,6 +42,10 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 20
+    },
+    "theme": {
+      "type": "string",
+      "enum": ["classic", "bubblegum"]
     },
     "visibility": {
       "type": "string",
