@@ -1,0 +1,4 @@
+interface:
+  display_name: "Birthday Wishlist Backup"
+  short_description: "Create and verify private Supabase backups"
+  default_prompt: "Use $birthday-wishlist-backup to prepare a safe production backup."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Birthday Wishlist Admin"
+  short_description: "Safely manage private wishlist content"
+  default_prompt: "Use $birthday-wishlist-admin to safely preview a wishlist content change."
