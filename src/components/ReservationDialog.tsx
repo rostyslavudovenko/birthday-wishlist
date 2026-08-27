@@ -27,6 +27,11 @@ function ReservationDialog({
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    const previouslyFocusedElement =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+
     inputRef.current?.focus();
 
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -41,6 +46,7 @@ function ReservationDialog({
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
       document.body.classList.remove("dialog-open");
+      previouslyFocusedElement?.focus();
     };
   }, [isSubmitting, onCancel]);
 

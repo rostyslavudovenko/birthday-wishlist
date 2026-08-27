@@ -412,9 +412,14 @@
   color: var(--dark-gray);
 }
 
+.notice-action:active {
+  color: var(--black);
+  background: var(--light-gray);
+}
+
 .notice-action:focus-visible {
   outline: 3px dotted var(--black);
-  outline-offset: 3px;
+  outline-offset: 4px;
 }
 
 .state-window {
@@ -804,7 +809,10 @@ body.dialog-open {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .retro-button {
+  .retro-button,
+  .notice-action,
+  .app-menu__trigger,
+  .app-menu__option {
     transition:
       color 100ms ease,
       background-color 100ms ease,
@@ -945,6 +953,11 @@ body.dialog-open {
   color: var(--white);
 }
 
+.app-menu__trigger:active:not([aria-expanded="true"]) {
+  background: var(--light-gray);
+  color: var(--black);
+}
+
 .app-menu__trigger:focus-visible,
 .app-menu__option:focus-visible {
   outline: 3px dotted var(--black);
@@ -976,6 +989,11 @@ body.dialog-open {
 .app-menu__option:focus-visible {
   background: var(--black);
   color: var(--white);
+}
+
+.app-menu__option:active {
+  background: var(--light-gray);
+  color: var(--black);
 }
 
 @media (max-width: 560px) {
