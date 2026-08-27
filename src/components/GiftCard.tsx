@@ -103,25 +103,23 @@ function GiftCard({
 
           <p>{gift.description}</p>
 
-          <div className="gift-purchase-details">
+          <div className="gift-purchase-row">
             <p className="gift-price">{gift.price}</p>
 
-            <div className="gift-store-link-row">
-              {gift.storeUrl && (
-                <a
-                  className="gift-store-link"
-                  href={gift.storeUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label={`View ${gift.name} product page, opens in a new tab`}
-                >
-                  <span className="gift-store-link__label">View product</span>
-                  <span className="gift-store-link__icon" aria-hidden="true">
-                    ↗
-                  </span>
-                </a>
-              )}
-            </div>
+            {gift.storeUrl && (
+              <a
+                className="gift-store-link"
+                href={gift.storeUrl}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`View ${gift.name} product page, opens in a new tab`}
+              >
+                <span className="gift-store-link__label">View product</span>
+                <span className="gift-store-link__icon" aria-hidden="true">
+                  ↗
+                </span>
+              </a>
+            )}
           </div>
 
           {showReleaseButton ? (

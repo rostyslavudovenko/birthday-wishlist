@@ -206,22 +206,21 @@
   line-height: 1.5;
 }
 
-.gift-purchase-details {
+.gift-purchase-row {
+  display: flex;
+  min-height: 30px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin-top: auto;
+  margin-bottom: 14px;
 }
 
 .gift-details .gift-price {
-  margin: 0 0 8px;
+  margin: 0;
   color: var(--black);
   font-size: 0.82rem;
   font-weight: 700;
-}
-
-.gift-store-link-row {
-  display: flex;
-  min-height: 34px;
-  align-items: flex-start;
-  margin-bottom: 12px;
 }
 
 .gift-store-link {
