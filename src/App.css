@@ -131,7 +131,7 @@
   grid-template-columns: 140px minmax(0, 1fr);
   gap: 20px;
   height: 100%;
-  padding: 18px;
+  padding: 20px;
 }
 
 .gift-image {
@@ -194,8 +194,9 @@
 
 .gift-heading h3 {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.1rem;
   line-height: 1.3;
+  letter-spacing: 0.01em;
 }
 
 .gift-details > p {
@@ -382,9 +383,10 @@
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 24px;
-  padding: 12px;
+  padding: 12px 14px;
   border: 2px solid var(--black);
   background: var(--white);
+  box-shadow: 3px 3px 0 var(--black);
   font-size: 0.82rem;
   font-weight: 700;
 }
@@ -420,20 +422,30 @@
   min-height: 220px;
   place-items: center;
   align-content: center;
-  gap: 12px;
-  border: 2px dashed var(--black);
+  gap: 14px;
+  border: 2px solid var(--black);
   background: var(--white);
+  box-shadow: 3px 3px 0 var(--black);
   text-align: center;
 }
 
 .state-window p {
   margin: 0;
-  font-size: 0.9rem;
+  color: var(--muted-text);
+  font-size: 0.82rem;
   font-weight: 700;
 }
 
 .state-icon {
-  font-size: 2rem;
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 2px solid var(--black);
+  border-radius: 50%;
+  background: var(--surface);
+  font-size: 1.25rem;
+  line-height: 1;
   filter: grayscale(1);
 }
 
@@ -475,8 +487,9 @@
 
 .directory-content h3 {
   margin: 0 0 10px;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   line-height: 1.3;
+  letter-spacing: 0.01em;
 }
 
 .directory-content p {
