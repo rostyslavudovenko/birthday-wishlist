@@ -184,12 +184,6 @@
   flex-direction: column;
 }
 
-.gift-heading {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 12px;
-}
-
 .gift-details > p {
   margin: 0 0 12px;
   color: var(--muted-text);
@@ -199,7 +193,7 @@
 
 .gift-purchase-row {
   display: flex;
-  min-height: 30px;
+  min-height: 34px;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -674,6 +668,17 @@
   .page-navigation {
     align-items: flex-start;
     flex-direction: column;
+  }
+}
+
+@media (max-width: 430px) {
+  .gift-purchase-row {
+    flex-wrap: wrap;
+  }
+
+  .gift-purchase-row .gift-store-link {
+    flex-basis: 100%;
+    justify-content: flex-end;
   }
 }
 

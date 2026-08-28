@@ -89,16 +89,6 @@ function GiftCard({
         </div>
 
         <div className="gift-details">
-          <div className="gift-heading">
-            <span
-              className={`status-badge ${
-                gift.isReserved ? "status-badge--reserved" : ""
-              }`}
-            >
-              {gift.isReserved ? "Reserved" : "Available"}
-            </span>
-          </div>
-
           <p>{gift.description}</p>
 
           <div className="gift-purchase-row">
@@ -118,6 +108,14 @@ function GiftCard({
                 </span>
               </a>
             )}
+
+            <span
+              className={`status-badge ${
+                gift.isReserved ? "status-badge--reserved" : ""
+              }`}
+            >
+              {gift.isReserved ? "Reserved" : "Available"}
+            </span>
           </div>
 
           {showReleaseButton ? (
