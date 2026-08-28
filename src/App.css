@@ -186,17 +186,8 @@
 
 .gift-heading {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.gift-heading h3 {
-  margin: 0;
-  font-size: 1.1rem;
-  line-height: 1.3;
-  letter-spacing: 0.01em;
+  justify-content: flex-end;
+  margin-bottom: 12px;
 }
 
 .gift-details > p {
@@ -643,11 +634,6 @@
 
   .gift-image {
     min-height: 180px;
-  }
-
-  .gift-heading {
-    align-items: flex-start;
-    flex-direction: column;
   }
 
   .dialog-backdrop {

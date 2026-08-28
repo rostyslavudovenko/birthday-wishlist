@@ -90,8 +90,6 @@ function GiftCard({
 
         <div className="gift-details">
           <div className="gift-heading">
-            <h3>{gift.name}</h3>
-
             <span
               className={`status-badge ${
                 gift.isReserved ? "status-badge--reserved" : ""
