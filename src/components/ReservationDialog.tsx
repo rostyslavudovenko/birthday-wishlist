@@ -27,6 +27,11 @@ function ReservationDialog({
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    const previouslyFocusedElement =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+
     inputRef.current?.focus();
 
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -41,6 +46,7 @@ function ReservationDialog({
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
       document.body.classList.remove("dialog-open");
+      previouslyFocusedElement?.focus();
     };
   }, [isSubmitting, onCancel]);
 
@@ -92,8 +98,6 @@ function ReservationDialog({
         aria-describedby="reservation-description"
       >
         <header className="window-title-bar">
-          <span className="window-control" aria-hidden="true" />
-
           <div className="title-lines" aria-hidden="true">
             <span />
             <span />
@@ -109,11 +113,6 @@ function ReservationDialog({
             <span />
             <span />
           </div>
-
-          <span
-            className="window-control window-control--right"
-            aria-hidden="true"
-          />
         </header>
 
         <form className="dialog-content" onSubmit={handleSubmit}>

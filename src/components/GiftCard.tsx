@@ -66,8 +66,6 @@ function GiftCard({
   return (
     <article className="gift-window">
       <header className="window-title-bar">
-        <span className="window-control" aria-hidden="true" />
-
         <div className="title-lines" aria-hidden="true">
           <span />
           <span />
@@ -83,11 +81,6 @@ function GiftCard({
           <span />
           <span />
         </div>
-
-        <span
-          className="window-control window-control--right"
-          aria-hidden="true"
-        />
       </header>
 
       <div className="gift-content">
@@ -96,8 +89,25 @@ function GiftCard({
         </div>
 
         <div className="gift-details">
-          <div className="gift-heading">
-            <h3>{gift.name}</h3>
+          <p>{gift.description}</p>
+
+          <div className="gift-purchase-row">
+            <p className="gift-price">{gift.price}</p>
+
+            {gift.storeUrl && (
+              <a
+                className="gift-store-link"
+                href={gift.storeUrl}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`View ${gift.name} product page, opens in a new tab`}
+              >
+                <span className="gift-store-link__label">View product</span>
+                <span className="gift-store-link__icon" aria-hidden="true">
+                  ↗
+                </span>
+              </a>
+            )}
 
             <span
               className={`status-badge ${
@@ -106,29 +116,6 @@ function GiftCard({
             >
               {gift.isReserved ? "Reserved" : "Available"}
             </span>
-          </div>
-
-          <p>{gift.description}</p>
-
-          <div className="gift-purchase-details">
-            <p className="gift-price">{gift.price}</p>
-
-            <div className="gift-store-link-row">
-              {gift.storeUrl && (
-                <a
-                  className="gift-store-link"
-                  href={gift.storeUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label={`View ${gift.name} product page, opens in a new tab`}
-                >
-                  <span className="gift-store-link__label">View product</span>
-                  <span className="gift-store-link__icon" aria-hidden="true">
-                    ↗
-                  </span>
-                </a>
-              )}
-            </div>
           </div>
 
           {showReleaseButton ? (
