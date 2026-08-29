@@ -135,6 +135,7 @@
 }
 
 .gift-image {
+  position: relative;
   display: grid;
   min-height: 146px;
   place-items: center;
@@ -169,6 +170,75 @@
   width: 100%;
   min-height: 146px;
   place-items: center;
+}
+
+.gift-burst {
+  position: absolute;
+  z-index: 1;
+  top: -16px;
+  right: -12px;
+  display: none;
+}
+
+[data-wishlist-theme="bubblegum"] .gift-burst {
+  --burst-pink: #ff7ab8;
+  display: flex;
+  width: 86px;
+  height: 86px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  padding: 4px 2px;
+  background: var(--burst-pink);
+  clip-path: polygon(
+    50% 0%,
+    61% 27%,
+    85% 15%,
+    73% 39%,
+    100% 50%,
+    73% 61%,
+    85% 85%,
+    61% 73%,
+    50% 100%,
+    39% 73%,
+    15% 85%,
+    27% 61%,
+    0% 50%,
+    27% 39%,
+    15% 15%,
+    39% 27%
+  );
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+  rotate: 12deg;
+  filter: drop-shadow(2px 2px 0 rgba(17, 17, 17, 0.4));
+}
+
+.gift-burst em {
+  display: block;
+  font-style: normal;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .gift-burst {
+    animation: burst-wiggle 3s steps(2) infinite;
+  }
+}
+
+@keyframes burst-wiggle {
+  0%,
+  100% {
+    rotate: 8deg;
+  }
+
+  50% {
+    rotate: 16deg;
+  }
 }
 
 @media (max-width: 560px) {

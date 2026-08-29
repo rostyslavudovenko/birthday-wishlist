@@ -86,6 +86,17 @@ function GiftCard({
       <div className="gift-content">
         <div className="gift-image">
           <GiftVisual key={gift.image} gift={gift} />
+
+          {!gift.isReserved && (
+            <span
+              className="gift-burst"
+              role="presentation"
+              aria-hidden="true"
+            >
+              <em>Pick</em>
+              <em>me!</em>
+            </span>
+          )}
         </div>
 
         <div className="gift-details">
