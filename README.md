@@ -447,6 +447,10 @@ birthday-wishlist/
 - Supabase secret keys are never exposed through Vite
 - Wishlist imports are executed atomically
 
+## Third-party Assets
+
+- **Icon:** [Tabler Icons](https://github.com/tabler/tabler-icons), used under the [MIT License](https://github.com/tabler/tabler-icons/blob/main/LICENSE).
+
 ## Contributing
 
 Contributions are welcome! If you have an idea, improvement, or found a bug, please create a new [GitHub Issue](https://github.com/rostyslavudovenko/birthday-wishlist).
