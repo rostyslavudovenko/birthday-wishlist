@@ -193,10 +193,11 @@
 
 .gift-purchase-row {
   display: flex;
+  flex-wrap: wrap;
   min-height: 34px;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 12px 16px;
   margin-top: auto;
   margin-bottom: 14px;
 }
@@ -673,16 +674,7 @@
   }
 }
 
-@media (max-width: 430px) {
-  .gift-purchase-row {
-    flex-wrap: wrap;
-  }
 
-  .gift-purchase-row .gift-store-link {
-    flex-basis: 100%;
-    justify-content: flex-end;
-  }
-}
 
 .dialog-backdrop {
   position: fixed;
