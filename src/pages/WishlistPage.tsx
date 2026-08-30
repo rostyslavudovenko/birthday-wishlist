@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { Link, useParams } from "react-router";
 import AppFooter from "../components/AppFooter";
+import CandyBurst from "../components/CandyBurst";
 import GiftCard from "../components/GiftCard";
 import MacWindow from "../components/MacWindow";
 import ReservationDialog from "../components/ReservationDialog";
@@ -40,6 +41,8 @@ function WishlistPage() {
   const [dialogError, setDialogError] = useState<string | null>(null);
 
   const realtimeChannelRef = useRef<RealtimeChannel | null>(null);
+  const [showCandyBurst, setShowCandyBurst] = useState(false);
+  const candyBurstTimerRef = useRef<number | null>(null);
 
   /*
    * These values are safe to use throughout the component.
@@ -172,6 +175,14 @@ function WishlistPage() {
     };
   }, [loadWishlist]);
 
+  useEffect(() => {
+    return () => {
+      if (candyBurstTimerRef.current !== null) {
+        window.clearTimeout(candyBurstTimerRef.current);
+      }
+    };
+  }, []);
+
   const closeReservationDialog = useCallback(() => {
     if (updatingGiftId !== null) {
       return;
@@ -206,6 +217,23 @@ function WishlistPage() {
       );
     }
   }, [slug]);
+
+  const celebrateReservation = useCallback(() => {
+    if (wishlistTheme !== "bubblegum") {
+      return;
+    }
+
+    if (candyBurstTimerRef.current !== null) {
+      window.clearTimeout(candyBurstTimerRef.current);
+    }
+
+    setShowCandyBurst(true);
+
+    candyBurstTimerRef.current = window.setTimeout(() => {
+      setShowCandyBurst(false);
+      candyBurstTimerRef.current = null;
+    }, 2000);
+  }, [wishlistTheme]);
 
   const reserveGift = async (name: string) => {
     const giftId = selectedGift?.id;
@@ -256,6 +284,8 @@ function WishlistPage() {
       );
 
       setSelectedGift(null);
+
+      celebrateReservation();
 
       await notifyOtherVisitors();
     } catch (reservationError) {
@@ -492,6 +522,8 @@ function WishlistPage() {
           onConfirm={reserveGift}
         />
         )}
+
+        {showCandyBurst && <CandyBurst />}
       </main>
     </div>
   );
