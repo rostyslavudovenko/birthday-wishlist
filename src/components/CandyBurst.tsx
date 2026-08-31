@@ -10,19 +10,27 @@ type CandyBurstProps = {
   count?: number;
 };
 
-function CandyBurst({ count = 24 }: CandyBurstProps) {
+function CandyBurst({ count = 30 }: CandyBurstProps) {
   const particles = Array.from({ length: count }, (_, index) => {
-    const drift = randomBetween(-140, 140);
-    const delay = randomBetween(0, 0.25);
-    const duration = randomBetween(1.4, 2.1);
-    const rotation = randomBetween(-160, 160);
+    const originX = randomBetween(4, 96);
+    const originY = randomBetween(5, 92);
+    const drift = randomBetween(-160, 160);
+    const rise = randomBetween(16, 40);
+    const fall = randomBetween(12, 34);
+    const delay = randomBetween(0, 0.3);
+    const duration = randomBetween(1.5, 2.3);
+    const rotation = randomBetween(-200, 200);
     const scale = randomBetween(0.7, 1.4);
-    const size = randomBetween(16, 30);
+    const size = randomBetween(16, 32);
 
     return {
       key: index,
       emoji: CANDY_EMOJI[index % CANDY_EMOJI.length],
+      originX,
+      originY,
       drift,
+      rise,
+      fall,
       delay,
       duration,
       rotation,
@@ -37,7 +45,11 @@ function CandyBurst({ count = 24 }: CandyBurstProps) {
         ({
           key,
           emoji,
+          originX,
+          originY,
           drift,
+          rise,
+          fall,
           delay,
           duration,
           rotation,
@@ -48,7 +60,11 @@ function CandyBurst({ count = 24 }: CandyBurstProps) {
             key={key}
             style={
               {
+                "--ox": `${originX}vw`,
+                "--oy": `${originY}vh`,
                 "--dx": `${drift}px`,
+                "--rise": `${rise}vh`,
+                "--fall": `${fall}vh`,
                 "--delay": `${delay}s`,
                 "--dur": `${duration}s`,
                 "--rot": `${rotation}deg`,
