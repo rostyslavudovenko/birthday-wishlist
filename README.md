@@ -449,6 +449,7 @@ birthday-wishlist/
 
 ## Third-party Assets
 
+- **Typography:** [IBM Plex Mono](https://fonts.google.com/specimen/IBM+Plex+Mono) v0.2.0 by [IBM](https://www.ibm.com/plex/), used under the [SIL Open Font License](https://scripts.sil.org/OFL).
 - **Icon:** [Tabler Icons](https://github.com/tabler/tabler-icons), used under the [MIT License](https://github.com/tabler/tabler-icons/blob/main/LICENSE).
 
 ## Contributing

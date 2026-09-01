@@ -1,5 +1,27 @@
+@font-face {
+  font-family: "IBM Plex Mono";
+  src:
+    url("./assets/fonts/IBMPlexMono-Regular.woff2") format("woff2"),
+    url("./assets/fonts/IBMPlexMono-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  src:
+    url("./assets/fonts/IBMPlexMono-Bold.woff2") format("woff2"),
+    url("./assets/fonts/IBMPlexMono-Bold.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  font-family: Geneva, Chicago, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family:
+    "IBM Plex Mono", Geneva, Chicago, "Helvetica Neue", Helvetica, Arial,
+    sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 
