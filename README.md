@@ -32,6 +32,7 @@ Reservation names and ownership tokens remain private. Other visitors only see w
 ## Features
 
 - **Retro Mac Interface:** Responsive interface inspired by classic Macintosh windows
+- **Presentation Themes:** Supports classic retro-Mac and celebratory bubblegum themes
 - **Wishlist Directory:** Public wishlists are available from the homepage
 - **Public and Unlisted Lists:** Unlisted wishlists are accessible only through their exact URL
 - **Gift Reservations:** Visitors can reserve available gifts without creating an account
@@ -41,7 +42,7 @@ Reservation names and ownership tokens remain private. Other visitors only see w
 - **Refresh Synchronization:** Wishlist data refreshes on page focus and visibility changes
 - **Gift Images:** Gifts support both emoji icons and direct image URLs
 - **Store Links:** Gifts can include an optional link to an external store
-- **Wishlist Importer:** New wishlists and gifts can be created from one private JSON file
+- **Wishlist Administration:** Wishlists and gifts can be created, exported, and synchronized from private JSON definitions
 - **Availability Monitoring:** A scheduled GitHub Actions workflow checks Supabase availability
 - **Backup Procedure:** Supabase roles, schema, and data can be exported with the included script
 - **Cloudflare Deployment:** The frontend is deployed through Cloudflare Pages
@@ -173,6 +174,8 @@ The application will be available at the local URL printed by Vite.
 - `npm run wishlist:validate` - Validate a wishlist JSON definition
 - `npm run wishlist:preflight` - Run a read-only Supabase import preflight
 - `npm run wishlist:import` - Create a wishlist and its gifts
+- `npm run wishlist:export` - Export an existing wishlist to a private JSON definition
+- `npm run wishlist:sync` - Preview and atomically synchronize wishlist and gift changes
 
 Before committing changes, run:
 
@@ -260,11 +263,13 @@ A wishlist definition contains the wishlist metadata and all gifts:
   "ownerName": "Sample Person",
   "description": "A synthetic example wishlist.",
   "icon": "🎂",
+  "theme": "classic",
   "visibility": "unlisted",
   "isFeatured": false,
   "displayOrder": 100,
   "gifts": [
     {
+      "key": "mechanical-keyboard",
       "name": "Mechanical Keyboard",
       "description": "A compact wireless keyboard.",
       "price": "Around €100",
@@ -294,6 +299,8 @@ Validation checks:
 - Required fields
 - Field types
 - Slug format
+- Stable gift keys
+- Supported themes
 - Supported visibility
 - Field lengths
 - Gift definitions
@@ -325,7 +332,29 @@ The importer repeats validation and preflight before writing data.
 
 The wishlist and all gifts are created in one PostgreSQL transaction. If any operation fails, the complete import is rolled back.
 
-For detailed setup, security requirements, commands, and troubleshooting, see the docs/wishlist-importer.md.
+### Export and Synchronize Wishlists
+
+Existing wishlists can be exported to private JSON definitions, edited, and synchronized atomically:
+
+1. Export an existing wishlist:
+
+```bash
+npm run wishlist:export -- sample-birthday-list
+```
+
+2. Validate and preview the planned changes:
+
+```bash
+npm run wishlist:sync -- wishlists/private/sample-birthday-list.json
+```
+
+3. Apply changes atomically after reviewing the preview:
+
+```bash
+npm run wishlist:sync -- wishlists/private/sample-birthday-list.json --confirm
+```
+
+For detailed setup, security requirements, commands, and troubleshooting, see [docs/wishlist-importer.md](docs/wishlist-importer.md).
 
 ## Supabase Backup
 
@@ -349,7 +378,7 @@ Generated backups are private and excluded from Git.
 
 Before making database schema changes, create and verify a fresh backup.
 
-For configuration, verification, storage, and restoration guidance, see the docs/supabase-backup.md.
+For configuration, verification, storage, and restoration guidance, see [docs/supabase-backup.md](docs/supabase-backup.md).
 
 ## Availability Monitoring
 
@@ -406,11 +435,17 @@ birthday-wishlist/
 │   └── wishlist.schema.json                 # Wishlist JSON schema
 ├── scripts/
 │   ├── wishlist-importer/
+│   │   ├── export-wishlist.mjs              # Wishlist definition exporter
 │   │   ├── import-wishlist.mjs              # Atomic wishlist importer
 │   │   ├── preflight-wishlist.mjs           # Read-only Supabase preflight
+│   │   ├── sync-wishlist.mjs                # Atomic wishlist synchronizer
 │   │   └── validate-wishlist.mjs            # Local JSON validator
 │   └── backup-supabase.sh                   # Supabase backup script
+├── skills/
+│   ├── birthday-wishlist-admin/             # Admin workflow skill
+│   └── birthday-wishlist-backup/            # Backup workflow skill
 ├── src/
+│   ├── assets/                              # Local font assets
 │   ├── components/                          # Reusable interface components
 │   ├── lib/                                 # Supabase client configuration
 │   ├── pages/                               # Application pages
@@ -419,12 +454,18 @@ birthday-wishlist/
 │   ├── utils/                               # Local storage utilities
 │   ├── App.css                              # Application styles
 │   ├── App.tsx                              # Application routing
+│   ├── index.css                            # Base stylesheet and font definitions
 │   └── main.tsx                             # Frontend entry point
 ├── supabase/
 │   └── migrations/
-│       └── 20260818120000_create_wishlist_import_rpc.sql
+│       ├── 20260818120000_create_wishlist_import_rpc.sql
+│       ├── 20260824120000_add_stable_gift_keys.sql
+│       ├── 20260824130000_update_wishlist_import_rpc_for_gift_keys.sql
+│       ├── 20260824150000_add_atomic_wishlist_sync_rpc.sql
+│       └── 20260826120000_add_wishlist_theme.sql
 ├── .env.example                             # Frontend environment example
 ├── .env.wishlist-importer.example           # Local importer environment example
+├── AGENTS.md                                # Project AI agent guidelines
 ├── LICENSE
 ├── package-lock.json
 ├── package.json
@@ -441,11 +482,13 @@ birthday-wishlist/
 - Reservation ownership tokens remain private
 - Unlisted wishlists are excluded from the public directory
 - Conditional updates prevent duplicate reservations
-- The importer RPC is restricted to trusted server-side credentials
+- The importer and synchronizer RPCs are restricted to trusted server-side credentials
+- Reservation data is excluded when exporting wishlists
+- Reserved gifts are protected from accidental hiding during sync
 - Private wishlist definitions are excluded from Git
 - Importer credentials are stored only in a local ignored environment file
 - Supabase secret keys are never exposed through Vite
-- Wishlist imports are executed atomically
+- Wishlist imports and synchronizations are executed atomically
 
 ## Third-party Assets
 

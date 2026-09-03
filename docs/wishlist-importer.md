@@ -72,6 +72,7 @@ supabase/migrations/20260818120000_create_wishlist_import_rpc.sql
 supabase/migrations/20260824120000_add_stable_gift_keys.sql
 supabase/migrations/20260824130000_update_wishlist_import_rpc_for_gift_keys.sql
 supabase/migrations/20260824150000_add_atomic_wishlist_sync_rpc.sql
+supabase/migrations/20260826120000_add_wishlist_theme.sql
 .env.wishlist-importer.example
 ```
 
@@ -1007,7 +1008,8 @@ supabase/migrations/
 ├── 20260818120000_create_wishlist_import_rpc.sql
 ├── 20260824120000_add_stable_gift_keys.sql
 ├── 20260824130000_update_wishlist_import_rpc_for_gift_keys.sql
-└── 20260824150000_add_atomic_wishlist_sync_rpc.sql
+├── 20260824150000_add_atomic_wishlist_sync_rpc.sql
+└── 20260826120000_add_wishlist_theme.sql
 ```
 
 ### Stable Gift Key Migration
@@ -1071,6 +1073,15 @@ sync_wishlist_with_gifts
 - adds, updates, reorders, hides, and restores gifts;
 - protects reserved gifts;
 - executes atomically.
+
+### Theme Migration
+
+The theme migration:
+
+- adds `wishlists.theme` with a default of `classic`;
+- enforces valid themes (`classic`, `bubblegum`) with the `wishlist_theme_is_valid` constraint;
+- updates `get_wishlist` to return the wishlist theme to the frontend;
+- updates `create_wishlist_with_gifts` and `sync_wishlist_with_gifts` to support theme configuration.
 
 ## Database Backup
 

@@ -128,6 +128,8 @@ get_wishlist
 get_wishlist_gifts
 reserve_gift
 release_gift
+create_wishlist_with_gifts
+sync_wishlist_with_gifts
 ```
 
 ## Verify the data structure
@@ -208,6 +210,8 @@ Do not restore a backup directly over production without testing it first.
 
 ```text
 scripts/backup-supabase.sh
+skills/birthday-wishlist-backup/SKILL.md
+docs/wishlist-importer.md
 .github/workflows/supabase-health-check.yml
 .gitignore
 ```
