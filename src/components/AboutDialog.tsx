@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { trapFocus } from "../utils/a11y";
 
 type AboutDialogProps = {
   onClose: () => void;
@@ -6,6 +7,7 @@ type AboutDialogProps = {
 
 function AboutDialog({ onClose }: AboutDialogProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const previouslyFocusedElement =
@@ -17,6 +19,10 @@ function AboutDialog({ onClose }: AboutDialogProps) {
     document.body.classList.add("dialog-open");
 
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (dialogRef.current) {
+        trapFocus(dialogRef.current, event);
+      }
+
       if (event.key === "Escape") {
         onClose();
       }
@@ -44,6 +50,7 @@ function AboutDialog({ onClose }: AboutDialogProps) {
       onMouseDown={handleBackdropMouseDown}
     >
       <section
+        ref={dialogRef}
         className="about-dialog"
         role="dialog"
         aria-modal="true"
