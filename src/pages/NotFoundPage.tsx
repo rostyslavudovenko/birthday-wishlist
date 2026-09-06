@@ -1,7 +1,12 @@
+import { useEffect } from "react";
 import { Link } from "react-router";
 import MacWindow from "../components/MacWindow";
 
 function NotFoundPage() {
+  useEffect(() => {
+    document.title = "404 Not Found — Birthday Wishlist";
+  }, []);
+
   return (
     <main className="desktop">
       <MacWindow title="404">
