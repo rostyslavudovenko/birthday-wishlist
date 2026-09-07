@@ -265,8 +265,8 @@
 @keyframes candy-burst-fly {
   0% {
     opacity: 0;
-    transform: translate(-50%, -50%)
-      translate3d(var(--ox), var(--oy), 0) scale(var(--scale)) rotate(0deg);
+    transform: translate(-50%, -50%) translate3d(var(--ox), var(--oy), 0)
+      scale(var(--scale)) rotate(0deg);
   }
 
   10% {
@@ -282,7 +282,11 @@
   100% {
     opacity: 0;
     transform: translate(-50%, -50%)
-      translate3d(calc(var(--ox) + var(--dx) * 0.6), calc(var(--oy) + var(--fall)), 0)
+      translate3d(
+        calc(var(--ox) + var(--dx) * 0.6),
+        calc(var(--oy) + var(--fall)),
+        0
+      )
       scale(calc(var(--scale) * 0.85)) rotate(var(--rot));
   }
 }
@@ -442,12 +446,24 @@
   cursor: not-allowed;
 }
 
+.retro-button--default {
+  position: relative;
+  border-width: 3px;
+  outline: 2px solid var(--black);
+  outline-offset: 2px;
+}
+
+.retro-button--default:active:not(:disabled) {
+  outline-offset: 1px;
+}
+
 [data-wishlist-theme="bubblegum"] .retro-button:not(.retro-button--secondary) {
   background: var(--color-accent);
   color: var(--color-accent-text);
 }
 
-[data-wishlist-theme="bubblegum"] .retro-button:hover:not(:disabled):not(.retro-button--secondary) {
+[data-wishlist-theme="bubblegum"]
+  .retro-button:hover:not(:disabled):not(.retro-button--secondary) {
   background: var(--color-surface-secondary);
   color: var(--color-text);
 }
@@ -807,8 +823,6 @@
     margin-top: -6px;
   }
 }
-
-
 
 .dialog-backdrop {
   position: fixed;
