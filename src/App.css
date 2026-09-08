@@ -789,7 +789,6 @@
 
   .reservation-dialog {
     box-shadow: 5px 5px 0 var(--black);
-    outline-offset: 2px;
   }
 
   .dialog-content {
@@ -839,8 +838,6 @@
 .reservation-dialog {
   width: min(480px, 100%);
   border: 2px solid var(--black);
-  outline: 1px solid var(--black);
-  outline-offset: 3px;
   background: var(--surface);
   box-shadow: 8px 8px 0 var(--black);
 }
@@ -959,8 +956,6 @@ body.dialog-open {
 .about-dialog {
   width: min(500px, 100%);
   border: 2px solid var(--black);
-  outline: 1px solid var(--black);
-  outline-offset: 3px;
   background: var(--surface);
   box-shadow: 8px 8px 0 var(--black);
 }
@@ -1042,7 +1037,6 @@ body.dialog-open {
 @media (max-width: 560px) {
   .about-dialog {
     box-shadow: 5px 5px 0 var(--black);
-    outline-offset: 2px;
   }
 
   .about-dialog__content {
