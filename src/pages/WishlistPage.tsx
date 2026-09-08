@@ -39,6 +39,7 @@ function WishlistPage() {
   const [updatingGiftId, setUpdatingGiftId] = useState<number | null>(null);
   const [pageError, setPageError] = useState<string | null>(null);
   const [dialogError, setDialogError] = useState<string | null>(null);
+  const [liveAnnouncement, setLiveAnnouncement] = useState<string>("");
 
   const realtimeChannelRef = useRef<RealtimeChannel | null>(null);
   const [showCandyBurst, setShowCandyBurst] = useState(false);
@@ -126,6 +127,7 @@ function WishlistPage() {
 
     const channel = createWishlistChannel(slug, () => {
       void loadWishlist();
+      setLiveAnnouncement("The wishlist was updated by another guest.");
     });
 
     realtimeChannelRef.current = channel;
@@ -369,6 +371,10 @@ function WishlistPage() {
     return (
       <div className="wishlist-theme" data-wishlist-theme={wishlistTheme}>
         <main className="desktop">
+          <div className="sr-only" aria-live="polite" aria-atomic="true">
+            {liveAnnouncement}
+          </div>
+
           <MacWindow title="Opening Wishlist">
             <div className="wishlist-content">
               <div className="state-window" role="status">
@@ -391,6 +397,10 @@ function WishlistPage() {
     return (
       <div className="wishlist-theme" data-wishlist-theme={wishlistTheme}>
         <main className="desktop">
+          <div className="sr-only" aria-live="polite" aria-atomic="true">
+            {liveAnnouncement}
+          </div>
+
           <MacWindow
             title={hasLoadingError ? "Wishlist Error" : "Wishlist Not Found"}
           >
@@ -440,6 +450,10 @@ function WishlistPage() {
   return (
     <div className="wishlist-theme" data-wishlist-theme={wishlistTheme}>
       <main className="desktop">
+        <div className="sr-only" aria-live="polite" aria-atomic="true">
+          {liveAnnouncement}
+        </div>
+
         <MacWindow title={wishlistTitle}>
           <div className="wishlist-content">
             <nav className="page-navigation" aria-label="Page navigation">
