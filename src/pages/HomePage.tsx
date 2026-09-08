@@ -27,6 +27,10 @@ function HomePage() {
   }, []);
 
   useEffect(() => {
+    document.title = "Birthday Wishlists";
+  }, []);
+
+  useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       void loadWishlists();
     }, 0);

@@ -116,3 +116,48 @@ button {
   background: var(--black);
   color: var(--white);
 }
+
+/* Standard CSS Scrollbars */
+html {
+  scrollbar-color: var(--color-surface-secondary) var(--color-canvas);
+  scrollbar-width: auto;
+}
+
+/* WebKit / Chromium / Safari Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--color-canvas);
+  background-image:
+    radial-gradient(var(--color-canvas-dot) 0.7px, transparent 0.7px),
+    radial-gradient(var(--color-canvas-dot) 0.7px, var(--color-canvas) 0.7px);
+  background-position:
+    0 0,
+    4px 4px;
+  background-size: 8px 8px;
+  border-left: 1px solid var(--black);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--surface);
+  border: 2px solid var(--black);
+  box-shadow:
+    inset 1px 1px 0 var(--white),
+    inset -1px -1px 0 var(--light-gray);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-surface-secondary);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: var(--black);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--surface);
+  border: 1px solid var(--black);
+}

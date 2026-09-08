@@ -39,6 +39,7 @@ function WishlistPage() {
   const [updatingGiftId, setUpdatingGiftId] = useState<number | null>(null);
   const [pageError, setPageError] = useState<string | null>(null);
   const [dialogError, setDialogError] = useState<string | null>(null);
+  const [liveAnnouncement, setLiveAnnouncement] = useState<string>("");
 
   const realtimeChannelRef = useRef<RealtimeChannel | null>(null);
   const [showCandyBurst, setShowCandyBurst] = useState(false);
@@ -126,6 +127,7 @@ function WishlistPage() {
 
     const channel = createWishlistChannel(slug, () => {
       void loadWishlist();
+      setLiveAnnouncement("The wishlist was updated by another guest.");
     });
 
     realtimeChannelRef.current = channel;
@@ -174,6 +176,16 @@ function WishlistPage() {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [loadWishlist]);
+
+  useEffect(() => {
+    if (isLoading) {
+      document.title = "Loading Wishlist… — Birthday Wishlist";
+    } else if (pageError || !wishlist) {
+      document.title = "Wishlist Not Found — Birthday Wishlist";
+    } else {
+      document.title = `${wishlist.title} — Birthday Wishlist`;
+    }
+  }, [isLoading, pageError, wishlist]);
 
   useEffect(() => {
     return () => {
@@ -359,6 +371,10 @@ function WishlistPage() {
     return (
       <div className="wishlist-theme" data-wishlist-theme={wishlistTheme}>
         <main className="desktop">
+          <div className="sr-only" aria-live="polite" aria-atomic="true">
+            {liveAnnouncement}
+          </div>
+
           <MacWindow title="Opening Wishlist">
             <div className="wishlist-content">
               <div className="state-window" role="status">
@@ -381,10 +397,87 @@ function WishlistPage() {
     return (
       <div className="wishlist-theme" data-wishlist-theme={wishlistTheme}>
         <main className="desktop">
+          <div className="sr-only" aria-live="polite" aria-atomic="true">
+            {liveAnnouncement}
+          </div>
+
           <MacWindow
             title={hasLoadingError ? "Wishlist Error" : "Wishlist Not Found"}
           >
             <div className="wishlist-content">
+              {pageError && (
+                <div className="notice notice--error" role="alert">
+                  <span>{pageError}</span>
+
+                  <button
+                    className="notice-action"
+                    type="button"
+                    onClick={retryLoading}
+                  >
+                    Try again
+                  </button>
+                </div>
+              )}
+
+              <div className="not-found-content">
+                <span className="not-found-icon" aria-hidden="true">
+                  {hasLoadingError ? "!" : "?"}
+                </span>
+
+                <h2>
+                  {hasLoadingError
+                    ? "The wishlist is temporarily unavailable."
+                    : "This wishlist could not be found."}
+                </h2>
+
+                <p>
+                  {hasLoadingError
+                    ? "Try loading the wishlist again or return to the public directory."
+                    : "Check the link or return to the public wishlist directory."}
+                </p>
+
+                <Link className="retro-button directory-link" to="/">
+                  Return home
+                </Link>
+              </div>
+            </div>
+          </MacWindow>
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="wishlist-theme" data-wishlist-theme={wishlistTheme}>
+      <main className="desktop">
+        <div className="sr-only" aria-live="polite" aria-atomic="true">
+          {liveAnnouncement}
+        </div>
+
+        <MacWindow title={wishlistTitle}>
+          <div className="wishlist-content">
+            <nav className="page-navigation" aria-label="Page navigation">
+              <Link className="back-link" to="/">
+                ← Wishlist directory
+              </Link>
+
+              {wishlistVisibility === "unlisted" && (
+                <span className="privacy-label">Unlisted</span>
+              )}
+            </nav>
+
+            <section className="intro">
+              <div className="intro-icon" aria-hidden="true">
+                {wishlistIcon}
+              </div>
+
+              <div>
+                <h2>{wishlistTitle}</h2>
+
+                <p>{wishlistDescription}</p>
+              </div>
+            </section>
+
             {pageError && (
               <div className="notice notice--error" role="alert">
                 <span>{pageError}</span>
@@ -399,128 +492,59 @@ function WishlistPage() {
               </div>
             )}
 
-            <div className="not-found-content">
-              <span className="not-found-icon" aria-hidden="true">
-                {hasLoadingError ? "!" : "?"}
-              </span>
+            {gifts.length > 0 && (
+              <div className="toolbar" aria-label="Wishlist summary">
+                <span>
+                  {gifts.length} {gifts.length === 1 ? "gift" : "gifts"}
+                </span>
 
-              <h2>
-                {hasLoadingError
-                  ? "The wishlist is temporarily unavailable."
-                  : "This wishlist could not be found."}
-              </h2>
-
-              <p>
-                {hasLoadingError
-                  ? "Try loading the wishlist again or return to the public directory."
-                  : "Check the link or return to the public wishlist directory."}
-              </p>
-
-              <Link className="retro-button directory-link" to="/">
-                Return home
-              </Link>
-            </div>
-            </div>
-          </MacWindow>
-        </main>
-      </div>
-    );
-  }
-
-  return (
-    <div className="wishlist-theme" data-wishlist-theme={wishlistTheme}>
-      <main className="desktop">
-        <MacWindow title={wishlistTitle}>
-        <div className="wishlist-content">
-          <nav className="page-navigation" aria-label="Page navigation">
-            <Link className="back-link" to="/">
-              ← Wishlist directory
-            </Link>
-
-            {wishlistVisibility === "unlisted" && (
-              <span className="privacy-label">Unlisted</span>
+                <span>
+                  {availableCount} {availableCount === 1 ? "is" : "are"} still
+                  available
+                </span>
+              </div>
             )}
-          </nav>
 
-          <section className="intro">
-            <div className="intro-icon" aria-hidden="true">
-              {wishlistIcon}
-            </div>
+            {gifts.length === 0 && !pageError && (
+              <div className="state-window">
+                <span className="state-icon" aria-hidden="true">
+                  □
+                </span>
 
-            <div>
-              <h2>{wishlistTitle}</h2>
+                <p>No gifts have been added to this wishlist yet.</p>
+              </div>
+            )}
 
-              <p>{wishlistDescription}</p>
-            </div>
-          </section>
-
-          {pageError && (
-            <div className="notice notice--error" role="alert">
-              <span>{pageError}</span>
-
-              <button
-                className="notice-action"
-                type="button"
-                onClick={retryLoading}
+            {gifts.length > 0 && (
+              <section
+                className="gift-grid"
+                aria-label={`${wishlistTitle} gifts`}
               >
-                Try again
-              </button>
-            </div>
-          )}
+                {gifts.map((gift) => (
+                  <GiftCard
+                    key={gift.id}
+                    gift={gift}
+                    canRelease={reservationIds.includes(gift.id)}
+                    isUpdating={updatingGiftId === gift.id}
+                    onChoose={openReservationDialog}
+                    onRelease={releaseGift}
+                  />
+                ))}
+              </section>
+            )}
 
-          {gifts.length > 0 && (
-            <div className="toolbar" aria-label="Wishlist summary">
-              <span>
-                {gifts.length} {gifts.length === 1 ? "gift" : "gifts"}
-              </span>
-
-              <span>
-                {availableCount} {availableCount === 1 ? "is" : "are"} still
-                available
-              </span>
-            </div>
-          )}
-
-          {gifts.length === 0 && !pageError && (
-            <div className="state-window">
-              <span className="state-icon" aria-hidden="true">
-                □
-              </span>
-
-              <p>No gifts have been added to this wishlist yet.</p>
-            </div>
-          )}
-
-          {gifts.length > 0 && (
-            <section
-              className="gift-grid"
-              aria-label={`${wishlistTitle} gifts`}
-            >
-              {gifts.map((gift) => (
-                <GiftCard
-                  key={gift.id}
-                  gift={gift}
-                  canRelease={reservationIds.includes(gift.id)}
-                  isUpdating={updatingGiftId === gift.id}
-                  onChoose={openReservationDialog}
-                  onRelease={releaseGift}
-                />
-              ))}
-            </section>
-          )}
-
-          <AppFooter />
-        </div>
+            <AppFooter />
+          </div>
         </MacWindow>
 
         {selectedGift !== null && (
-        <ReservationDialog
-          gift={selectedGift}
-          isSubmitting={updatingGiftId === selectedGift.id}
-          submitError={dialogError}
-          onCancel={closeReservationDialog}
-          onConfirm={reserveGift}
-        />
+          <ReservationDialog
+            gift={selectedGift}
+            isSubmitting={updatingGiftId === selectedGift.id}
+            submitError={dialogError}
+            onCancel={closeReservationDialog}
+            onConfirm={reserveGift}
+          />
         )}
 
         {showCandyBurst && <CandyBurst />}

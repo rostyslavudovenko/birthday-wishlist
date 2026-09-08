@@ -6,6 +6,7 @@ import {
   type FormEvent,
 } from "react";
 import type { Gift } from "../types/gift";
+import { trapFocus } from "../utils/a11y";
 
 type ReservationDialogProps = {
   gift: Gift;
@@ -25,6 +26,7 @@ function ReservationDialog({
   const [name, setName] = useState("");
   const [validationError, setValidationError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const previouslyFocusedElement =
@@ -35,6 +37,10 @@ function ReservationDialog({
     inputRef.current?.focus();
 
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (dialogRef.current) {
+        trapFocus(dialogRef.current, event);
+      }
+
       if (event.key === "Escape" && !isSubmitting) {
         onCancel();
       }
@@ -91,6 +97,7 @@ function ReservationDialog({
       }}
     >
       <section
+        ref={dialogRef}
         className="reservation-dialog"
         role="dialog"
         aria-modal="true"
@@ -169,7 +176,7 @@ function ReservationDialog({
             </button>
 
             <button
-              className="retro-button"
+              className="retro-button retro-button--default"
               type="submit"
               disabled={isSubmitting}
             >

@@ -1,12 +1,26 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from "react";
 import AboutDialog from "./AboutDialog";
+
+const menuOptions = [
+  {
+    id: "about",
+    label: "About Birthday Wishlist",
+  },
+];
 
 function AppMenu() {
   const [isHelpMenuOpen, setIsHelpMenuOpen] = useState(false);
   const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
+  const [focusedItemIndex, setFocusedItemIndex] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
   const helpButtonRef = useRef<HTMLButtonElement>(null);
-  const aboutButtonRef = useRef<HTMLButtonElement>(null);
+  const menuItemRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const closeHelpMenu = useCallback(() => {
     setIsHelpMenuOpen(false);
@@ -18,6 +32,11 @@ function AppMenu() {
     window.requestAnimationFrame(() => {
       helpButtonRef.current?.focus();
     });
+  }, []);
+
+  const openAboutDialog = useCallback(() => {
+    setIsHelpMenuOpen(false);
+    setIsAboutDialogOpen(true);
   }, []);
 
   useEffect(() => {
@@ -34,7 +53,7 @@ function AppMenu() {
       }
     };
 
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key === "Escape") {
         closeHelpMenu();
         helpButtonRef.current?.focus();
@@ -52,17 +71,36 @@ function AppMenu() {
 
   useEffect(() => {
     if (isHelpMenuOpen) {
-      aboutButtonRef.current?.focus();
+      menuItemRefs.current[focusedItemIndex]?.focus();
     }
-  }, [isHelpMenuOpen]);
+  }, [focusedItemIndex, isHelpMenuOpen]);
 
-  const toggleHelpMenu = () => {
-    setIsHelpMenuOpen((currentValue) => !currentValue);
+  const handleMenuKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setFocusedItemIndex((prev) => (prev + 1) % menuOptions.length);
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setFocusedItemIndex(
+        (prev) => (prev - 1 + menuOptions.length) % menuOptions.length,
+      );
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      setFocusedItemIndex(0);
+    } else if (event.key === "End") {
+      event.preventDefault();
+      setFocusedItemIndex(menuOptions.length - 1);
+    }
   };
 
-  const openAboutDialog = () => {
-    setIsHelpMenuOpen(false);
-    setIsAboutDialogOpen(true);
+  const toggleHelpMenu = () => {
+    setIsHelpMenuOpen((currentValue) => {
+      if (!currentValue) {
+        setFocusedItemIndex(0);
+      }
+
+      return !currentValue;
+    });
   };
 
   return (
@@ -78,8 +116,9 @@ function AppMenu() {
             aria-controls="help-menu"
             onClick={toggleHelpMenu}
             onKeyDown={(event) => {
-              if (event.key === "ArrowDown") {
+              if (event.key === "ArrowDown" || event.key === "ArrowUp") {
                 event.preventDefault();
+                setFocusedItemIndex(0);
                 setIsHelpMenuOpen(true);
               }
             }}
@@ -88,16 +127,27 @@ function AppMenu() {
           </button>
 
           {isHelpMenuOpen && (
-            <div className="app-menu__dropdown" id="help-menu" role="menu">
-              <button
-                ref={aboutButtonRef}
-                className="app-menu__option"
-                type="button"
-                role="menuitem"
-                onClick={openAboutDialog}
-              >
-                About Birthday Wishlist
-              </button>
+            <div
+              className="app-menu__dropdown"
+              id="help-menu"
+              role="menu"
+              onKeyDown={handleMenuKeyDown}
+            >
+              {menuOptions.map((option, index) => (
+                <button
+                  key={option.id}
+                  ref={(node) => {
+                    menuItemRefs.current[index] = node;
+                  }}
+                  className="app-menu__option"
+                  type="button"
+                  role="menuitem"
+                  tabIndex={index === focusedItemIndex ? 0 : -1}
+                  onClick={openAboutDialog}
+                >
+                  {option.label}
+                </button>
+              ))}
             </div>
           )}
         </div>
