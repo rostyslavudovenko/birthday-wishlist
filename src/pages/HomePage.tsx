@@ -2,47 +2,90 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 import AppFooter from "../components/AppFooter";
 import MacWindow from "../components/MacWindow";
-import { fetchFeaturedWishlists } from "../services/wishlists";
+import {
+  getCachedFeaturedWishlists,
+  loadFeaturedWishlists,
+} from "../services/wishlistCache";
 import type { FeaturedWishlist } from "../types/wishlist";
 
 function HomePage() {
-  const [wishlists, setWishlists] = useState<FeaturedWishlist[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const cachedWishlists = getCachedFeaturedWishlists();
+
+  const [wishlists, setWishlists] = useState<FeaturedWishlist[]>(
+    () => cachedWishlists ?? [],
+  );
+  const [isLoading, setIsLoading] = useState(() => cachedWishlists === null);
+  const [isRefreshing, setIsRefreshing] = useState(
+    () => cachedWishlists !== null,
+  );
   const [error, setError] = useState<string | null>(null);
 
-  const loadWishlists = useCallback(async () => {
-    setError(null);
+  const loadWishlists = useCallback(
+    async ({ showInitialLoading = false } = {}) => {
+      if (showInitialLoading) {
+        setIsLoading(true);
+      } else {
+        setIsRefreshing(true);
+      }
 
-    try {
-      const featuredWishlists = await fetchFeaturedWishlists();
+      setError(null);
 
-      setWishlists(featuredWishlists);
-    } catch (loadError) {
-      console.error("Could not load featured wishlists:", loadError);
-
-      setError("The wishlists could not be loaded. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+      try {
+        const featuredWishlists = await loadFeaturedWishlists();
+        setWishlists(featuredWishlists);
+      } catch (loadError) {
+        console.error("Could not load featured wishlists:", loadError);
+        setError("The wishlists could not be loaded. Please try again.");
+      } finally {
+        setIsLoading(false);
+        setIsRefreshing(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     document.title = "Birthday Wishlists";
   }, []);
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      void loadWishlists();
-    }, 0);
+    let isActive = true;
+
+    void loadFeaturedWishlists()
+      .then((featuredWishlists) => {
+        if (!isActive) {
+          return;
+        }
+
+        setWishlists(featuredWishlists);
+        setError(null);
+      })
+      .catch((loadError: unknown) => {
+        if (!isActive) {
+          return;
+        }
+
+        console.error("Could not load featured wishlists:", loadError);
+        setError("The wishlists could not be loaded. Please try again.");
+      })
+      .finally(() => {
+        if (!isActive) {
+          return;
+        }
+
+        setIsLoading(false);
+        setIsRefreshing(false);
+      });
 
     return () => {
-      window.clearTimeout(timeoutId);
+      isActive = false;
     };
-  }, [loadWishlists]);
+  }, []);
 
   const retryLoading = () => {
-    setIsLoading(true);
-    void loadWishlists();
+    void loadWishlists({
+      showInitialLoading: wishlists.length === 0,
+    });
   };
 
   return (
@@ -56,7 +99,6 @@ function HomePage() {
 
             <div>
               <h2>Birthday Wishlists</h2>
-
               <p>
                 Open a wishlist, choose a gift, and avoid buying the same thing
                 as someone else.
@@ -78,12 +120,17 @@ function HomePage() {
             </div>
           )}
 
+          {isRefreshing && wishlists.length > 0 && (
+            <div className="sr-only" role="status" aria-live="polite">
+              Refreshing wishlists.
+            </div>
+          )}
+
           {isLoading ? (
             <div className="state-window" role="status">
               <span className="state-icon" aria-hidden="true">
                 ⌛
               </span>
-
               <p>Loading wishlists...</p>
             </div>
           ) : wishlists.length === 0 && !error ? (
@@ -91,13 +138,13 @@ function HomePage() {
               <span className="state-icon" aria-hidden="true">
                 □
               </span>
-
               <p>No public wishlists are available yet.</p>
             </div>
           ) : (
             <section
               className="wishlist-directory"
               aria-label="Public wishlists"
+              aria-busy={isRefreshing}
             >
               {wishlists.map((wishlist) => (
                 <article className="directory-window" key={wishlist.slug}>
@@ -125,7 +172,6 @@ function HomePage() {
                     </div>
 
                     <h3>{wishlist.title}</h3>
-
                     <p>{wishlist.description}</p>
 
                     <div className="directory-stats">
@@ -133,7 +179,6 @@ function HomePage() {
                         {wishlist.giftCount}{" "}
                         {wishlist.giftCount === 1 ? "gift" : "gifts"}
                       </span>
-
                       <span>{wishlist.availableCount} available</span>
                     </div>
 
