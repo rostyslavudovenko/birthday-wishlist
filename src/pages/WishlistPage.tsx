@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
 import type { RealtimeChannel } from "@supabase/supabase-js";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router";
 import AppFooter from "../components/AppFooter";
 import CandyBurst from "../components/CandyBurst";
@@ -8,7 +8,6 @@ import MacWindow from "../components/MacWindow";
 import ReservationDialog from "../components/ReservationDialog";
 import { supabase } from "../lib/supabase";
 import {
-  fetchWishlistGifts,
   releaseGift as releaseGiftRequest,
   reserveGift as reserveGiftRequest,
 } from "../services/gifts";
@@ -16,7 +15,11 @@ import {
   broadcastWishlistChange,
   createWishlistChannel,
 } from "../services/realtime";
-import { fetchWishlist } from "../services/wishlists";
+import {
+  getCachedWishlistPage,
+  refreshWishlistPage,
+  updateCachedWishlistGifts,
+} from "../services/wishlistCache";
 import type { Gift } from "../types/gift";
 import type { Wishlist } from "../types/wishlist";
 import {
@@ -27,98 +30,99 @@ import {
 
 function WishlistPage() {
   const { slug = "" } = useParams();
+  const cachedData = getCachedWishlistPage(slug);
 
-  const [wishlist, setWishlist] = useState<Wishlist | null>(null);
-  const [gifts, setGifts] = useState<Gift[]>([]);
+  const [wishlist, setWishlist] = useState<Wishlist | null>(
+    () => cachedData?.wishlist ?? null,
+  );
+  const [gifts, setGifts] = useState<Gift[]>(() => cachedData?.gifts ?? []);
   const [selectedGift, setSelectedGift] = useState<Gift | null>(null);
   const [reservationIds, setReservationIds] = useState<number[]>(() =>
     loadReservationIds(slug),
   );
   const [visitorToken] = useState(() => getVisitorToken());
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => cachedData === null);
   const [updatingGiftId, setUpdatingGiftId] = useState<number | null>(null);
   const [pageError, setPageError] = useState<string | null>(null);
   const [dialogError, setDialogError] = useState<string | null>(null);
   const [liveAnnouncement, setLiveAnnouncement] = useState<string>("");
+  const [showCandyBurst, setShowCandyBurst] = useState(false);
 
   const realtimeChannelRef = useRef<RealtimeChannel | null>(null);
-  const [showCandyBurst, setShowCandyBurst] = useState(false);
   const candyBurstTimerRef = useRef<number | null>(null);
 
-  /*
-   * These values are safe to use throughout the component.
-   * No code below needs to read a property directly from
-   * the nullable wishlist state.
-   */
   const activeWishlistSlug = wishlist?.slug ?? slug;
   const wishlistTitle = wishlist?.title ?? "Wishlist";
   const wishlistDescription = wishlist?.description ?? "";
   const wishlistIcon = wishlist?.icon ?? "🎁";
   const wishlistTheme = wishlist?.theme ?? "classic";
   const wishlistVisibility = wishlist?.visibility ?? null;
-
   const availableCount = gifts.filter((gift) => !gift.isReserved).length;
 
-  const loadWishlist = useCallback(async () => {
-    if (!slug) {
-      setWishlist(null);
-      setGifts([]);
-      setIsLoading(false);
-      return;
-    }
+  const applyWishlistData = useCallback(
+    (data: Awaited<ReturnType<typeof refreshWishlistPage>>) => {
+      setPageError(null);
+      setWishlist(data?.wishlist ?? null);
+      setGifts(data?.gifts ?? []);
 
-    setPageError(null);
-
-    try {
-      const [wishlistDetails, wishlistGifts] = await Promise.all([
-        fetchWishlist(slug),
-        fetchWishlistGifts(slug),
-      ]);
-
-      setWishlist(wishlistDetails);
-
-      setGifts(wishlistDetails ? wishlistGifts : []);
-
-      if (!wishlistDetails) {
+      if (!data) {
         setReservationIds([]);
+        saveReservationIds(slug, []);
         return;
       }
 
       setReservationIds((currentIds) => {
         const validIds = currentIds.filter((giftId) =>
-          wishlistGifts.some((gift) => gift.id === giftId && gift.isReserved),
+          data.gifts.some((gift) => gift.id === giftId && gift.isReserved),
         );
-
         saveReservationIds(slug, validIds);
-
         return validIds;
       });
+    },
+    [slug],
+  );
+
+  const loadWishlist = useCallback(async () => {
+    try {
+      const data = await refreshWishlistPage(slug);
+      applyWishlistData(data);
     } catch (loadError) {
       console.error("Could not load wishlist:", loadError);
-
       setPageError("The wishlist could not be loaded. Please try again.");
-    } finally {
-      setIsLoading(false);
     }
-  }, [slug]);
+  }, [applyWishlistData, slug]);
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      setWishlist(null);
-      setGifts([]);
-      setSelectedGift(null);
-      setDialogError(null);
-      setPageError(null);
-      setReservationIds(loadReservationIds(slug));
-      setIsLoading(true);
+    let isActive = true;
 
-      void loadWishlist();
-    }, 0);
+    void refreshWishlistPage(slug)
+      .then((data) => {
+        if (!isActive) {
+          return;
+        }
+
+        applyWishlistData(data);
+      })
+      .catch((loadError: unknown) => {
+        if (!isActive) {
+          return;
+        }
+
+        console.error("Could not load wishlist:", loadError);
+        setPageError("The wishlist could not be loaded. Please try again.");
+      })
+      .finally(() => {
+        if (!isActive) {
+          return;
+        }
+
+        setIsLoading(false);
+      });
 
     return () => {
-      window.clearTimeout(timeoutId);
+      isActive = false;
     };
-  }, [loadWishlist, slug]);
+  }, [applyWishlistData, slug]);
 
   useEffect(() => {
     if (!slug) {
@@ -240,7 +244,6 @@ function WishlistPage() {
     }
 
     setShowCandyBurst(true);
-
     candyBurstTimerRef.current = window.setTimeout(() => {
       setShowCandyBurst(false);
       candyBurstTimerRef.current = null;
@@ -269,7 +272,6 @@ function WishlistPage() {
         setDialogError(
           "Someone has already reserved this gift. The wishlist has been refreshed.",
         );
-
         await loadWishlist();
         return;
       }
@@ -278,31 +280,29 @@ function WishlistPage() {
         const nextIds = currentIds.includes(giftId)
           ? currentIds
           : [...currentIds, giftId];
-
         saveReservationIds(activeWishlistSlug, nextIds);
-
         return nextIds;
       });
 
-      setGifts((currentGifts) =>
-        currentGifts.map((gift) =>
+      setGifts((currentGifts) => {
+        const nextGifts = currentGifts.map((gift) =>
           gift.id === giftId
             ? {
                 ...gift,
                 isReserved: true,
               }
             : gift,
-        ),
-      );
+        );
+
+        updateCachedWishlistGifts(activeWishlistSlug, nextGifts);
+        return nextGifts;
+      });
 
       setSelectedGift(null);
-
       celebrateReservation();
-
       await notifyOtherVisitors();
     } catch (reservationError) {
       console.error("Could not reserve gift:", reservationError);
-
       setDialogError("The gift could not be reserved. Please try again.");
     } finally {
       setUpdatingGiftId(null);
@@ -328,34 +328,33 @@ function WishlistPage() {
         setPageError(
           "This reservation could not be released. It may belong to another browser.",
         );
-
         await loadWishlist();
         return;
       }
 
       setReservationIds((currentIds) => {
         const nextIds = currentIds.filter((currentId) => currentId !== giftId);
-
         saveReservationIds(activeWishlistSlug, nextIds);
-
         return nextIds;
       });
 
-      setGifts((currentGifts) =>
-        currentGifts.map((gift) =>
+      setGifts((currentGifts) => {
+        const nextGifts = currentGifts.map((gift) =>
           gift.id === giftId
             ? {
                 ...gift,
                 isReserved: false,
               }
             : gift,
-        ),
-      );
+        );
+
+        updateCachedWishlistGifts(activeWishlistSlug, nextGifts);
+        return nextGifts;
+      });
 
       await notifyOtherVisitors();
     } catch (releaseError) {
       console.error("Could not release gift:", releaseError);
-
       setPageError("The reservation could not be released. Please try again.");
     } finally {
       setUpdatingGiftId(null);
@@ -363,8 +362,10 @@ function WishlistPage() {
   };
 
   const retryLoading = () => {
-    setIsLoading(true);
-    void loadWishlist();
+    setIsLoading(wishlist === null);
+    void loadWishlist().finally(() => {
+      setIsLoading(false);
+    });
   };
 
   if (isLoading) {
@@ -381,7 +382,6 @@ function WishlistPage() {
                 <span className="state-icon" aria-hidden="true">
                   ⌛
                 </span>
-
                 <p>Loading wishlist...</p>
               </div>
             </div>
@@ -408,7 +408,6 @@ function WishlistPage() {
               {pageError && (
                 <div className="notice notice--error" role="alert">
                   <span>{pageError}</span>
-
                   <button
                     className="notice-action"
                     type="button"
@@ -423,19 +422,16 @@ function WishlistPage() {
                 <span className="not-found-icon" aria-hidden="true">
                   {hasLoadingError ? "!" : "?"}
                 </span>
-
                 <h2>
                   {hasLoadingError
                     ? "The wishlist is temporarily unavailable."
                     : "This wishlist could not be found."}
                 </h2>
-
                 <p>
                   {hasLoadingError
                     ? "Try loading the wishlist again or return to the public directory."
                     : "Check the link or return to the public wishlist directory."}
                 </p>
-
                 <Link className="retro-button directory-link" to="/">
                   Return home
                 </Link>
@@ -473,7 +469,6 @@ function WishlistPage() {
 
               <div>
                 <h2>{wishlistTitle}</h2>
-
                 <p>{wishlistDescription}</p>
               </div>
             </section>
@@ -481,7 +476,6 @@ function WishlistPage() {
             {pageError && (
               <div className="notice notice--error" role="alert">
                 <span>{pageError}</span>
-
                 <button
                   className="notice-action"
                   type="button"
@@ -497,7 +491,6 @@ function WishlistPage() {
                 <span>
                   {gifts.length} {gifts.length === 1 ? "gift" : "gifts"}
                 </span>
-
                 <span>
                   {availableCount} {availableCount === 1 ? "is" : "are"} still
                   available
@@ -510,7 +503,6 @@ function WishlistPage() {
                 <span className="state-icon" aria-hidden="true">
                   □
                 </span>
-
                 <p>No gifts have been added to this wishlist yet.</p>
               </div>
             )}
