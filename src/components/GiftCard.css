@@ -1,0 +1,14 @@
+/* Bubblegum reservation states.
+These overrides are intentionally scoped to GiftCard and the bubblegum theme. */
+[data-wishlist-theme="bubblegum"] .status-badge--reserved {
+  border-color: #111111;
+  background: #ff6b9d;
+  color: #111111;
+}
+
+[data-wishlist-theme="bubblegum"] .gift-action--already-chosen:disabled {
+  border-color: #111111;
+  background: #d5d5d5;
+  color: #3e3e3e;
+  opacity: 1;
+}
