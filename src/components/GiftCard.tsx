@@ -1,6 +1,5 @@
 import { useState } from "react";
 import type { Gift } from "../types/gift";
-import "./GiftCard.css";
 
 type GiftCardProps = {
   gift: Gift;

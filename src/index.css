@@ -100,6 +100,11 @@ body {
   --color-accent-text: #ffffff;
   --color-disabled: #9b6b7b;
   --color-overlay: rgb(17 17 17 / 58%);
+
+  --color-reserved-background: #ff6b9d;
+  --color-reserved-text: #111111;
+  --color-already-chosen-background: #d5d5d5;
+  --color-already-chosen-text: #3e3e3e;
 }
 
 button,
