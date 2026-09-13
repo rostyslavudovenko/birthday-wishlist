@@ -469,8 +469,16 @@
 }
 
 [data-wishlist-theme="bubblegum"] .status-badge--reserved {
-  background: var(--color-accent);
-  color: var(--color-accent-text);
+  border-color: var(--color-border);
+  background: var(--color-reserved-background);
+  color: var(--color-reserved-text);
+}
+
+[data-wishlist-theme="bubblegum"] .gift-action--already-chosen:disabled {
+  border-color: var(--color-border);
+  background: var(--color-already-chosen-background);
+  color: var(--color-already-chosen-text);
+  opacity: 1;
 }
 
 [data-wishlist-theme="bubblegum"] .intro-icon,
