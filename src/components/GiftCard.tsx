@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { Gift } from "../types/gift";
+import "./GiftCard.css";
 
 type GiftCardProps = {
   gift: Gift;
@@ -16,7 +17,6 @@ type GiftVisualProps = {
 function isImageUrl(value: string): boolean {
   try {
     const url = new URL(value);
-
     return url.protocol === "https:" || url.protocol === "http:";
   } catch {
     return false;
@@ -56,12 +56,18 @@ function GiftCard({
   onRelease,
 }: GiftCardProps) {
   const showReleaseButton = gift.isReserved && canRelease;
-
   const chooseButtonLabel = isUpdating
     ? "Saving..."
     : gift.isReserved
       ? "Already chosen"
       : "Choose this gift";
+
+  const chooseButtonClassName = [
+    "retro-button",
+    gift.isReserved && !canRelease ? "gift-action--already-chosen" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <article className="gift-window">
@@ -88,11 +94,7 @@ function GiftCard({
           <GiftVisual key={gift.image} gift={gift} />
 
           {!gift.isReserved && (
-            <span
-              className="gift-burst"
-              role="presentation"
-              aria-hidden="true"
-            >
+            <span className="gift-burst" role="presentation" aria-hidden="true">
               <em>Pick</em>
               <em>me!</em>
             </span>
@@ -140,7 +142,7 @@ function GiftCard({
             </button>
           ) : (
             <button
-              className="retro-button"
+              className={chooseButtonClassName}
               type="button"
               disabled={gift.isReserved || isUpdating}
               onClick={() => onChoose(gift)}
