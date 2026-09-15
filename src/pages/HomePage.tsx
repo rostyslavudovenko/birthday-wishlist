@@ -5,6 +5,7 @@ import MacWindow from "../components/MacWindow";
 import {
   getCachedFeaturedWishlists,
   loadFeaturedWishlists,
+  prefetchWishlistPage,
 } from "../services/wishlistCache";
 import type { FeaturedWishlist } from "../types/wishlist";
 
@@ -185,6 +186,26 @@ function HomePage() {
                     <Link
                       className="retro-button directory-link"
                       to={`/w/${wishlist.slug}`}
+                      onPointerEnter={() => {
+                        void prefetchWishlistPage(wishlist.slug).catch(
+                          (prefetchError: unknown) => {
+                            console.debug(
+                              `Could not prefetch wishlist ${wishlist.slug}:`,
+                              prefetchError,
+                            );
+                          },
+                        );
+                      }}
+                      onFocus={() => {
+                        void prefetchWishlistPage(wishlist.slug).catch(
+                          (prefetchError: unknown) => {
+                            console.debug(
+                              `Could not prefetch wishlist ${wishlist.slug}:`,
+                              prefetchError,
+                            );
+                          },
+                        );
+                      }}
                     >
                       Open wishlist
                     </Link>
