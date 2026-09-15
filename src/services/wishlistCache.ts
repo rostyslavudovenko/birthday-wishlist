@@ -110,6 +110,14 @@ export async function loadWishlistPage(
   return request;
 }
 
+export async function prefetchWishlistPage(slug: string): Promise<void> {
+  if (getCachedWishlistPage(slug)) {
+    return;
+  }
+
+  await loadWishlistPage(slug);
+}
+
 export async function refreshWishlistPage(
   slug: string,
 ): Promise<WishlistPageData | null> {
