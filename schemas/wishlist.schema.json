@@ -62,7 +62,7 @@
       "type": "array",
       "minItems": 1,
       "items": {
-        "ref": "#/defs/gift"
+        "$ref": "#/$defs/gift"
       }
     }
   },

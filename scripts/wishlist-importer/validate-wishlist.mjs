@@ -26,7 +26,15 @@ function isRecord(value) {
 function hasOnlyFields(value, allowedFields, path, errors) {
   for (const field of Object.keys(value)) {
     if (!allowedFields.includes(field)) {
-      errors.push(`path.{field}: unknown field.`);
+      errors.push(`${path}.${field}: unknown field.`);
+    }
+  }
+}
+
+function validateRequiredFields(value, requiredFields, path, errors) {
+  for (const field of requiredFields) {
+    if (!(field in value)) {
+      errors.push(`${path}.${field}: required field is missing.`);
     }
   }
 }
@@ -51,7 +59,6 @@ function validateString(value, path, errors, { minLength = 1, maxLength }) {
 function isHttpUrl(value) {
   try {
     const url = new URL(value);
-
     return url.protocol === "https:" || url.protocol === "http:";
   } catch {
     return false;
@@ -67,14 +74,11 @@ function validateGift(gift, index, errors) {
   }
 
   hasOnlyFields(gift, giftFields, path, errors);
+  validateRequiredFields(gift, giftFields, path, errors);
 
-  for (const field of giftFields) {
-    if (!(field in gift)) {
-      errors.push(`path.{field}: required field is missing.`);
-    }
-  }
-
-  validateString(gift.key, `${path}.key`, errors, { maxLength: 120 });
+  validateString(gift.key, `${path}.key`, errors, {
+    maxLength: 120,
+  });
 
   if (typeof gift.key === "string" && !stableKeyPattern.test(gift.key)) {
     errors.push(
@@ -82,12 +86,21 @@ function validateGift(gift, index, errors) {
     );
   }
 
-  validateString(gift.name, `${path}.name`, errors, { maxLength: 160 });
+  validateString(gift.name, `${path}.name`, errors, {
+    maxLength: 160,
+  });
+
   validateString(gift.description, `${path}.description`, errors, {
     maxLength: 1000,
   });
-  validateString(gift.price, `${path}.price`, errors, { maxLength: 120 });
-  validateString(gift.image, `${path}.image`, errors, { maxLength: 2048 });
+
+  validateString(gift.price, `${path}.price`, errors, {
+    maxLength: 120,
+  });
+
+  validateString(gift.image, `${path}.image`, errors, {
+    maxLength: 2048,
+  });
 
   if (gift.storeUrl !== null) {
     if (typeof gift.storeUrl !== "string" || !isHttpUrl(gift.storeUrl)) {
@@ -104,14 +117,11 @@ function validateWishlist(value) {
   }
 
   hasOnlyFields(value, wishlistFields, "wishlist", errors);
+  validateRequiredFields(value, wishlistFields, "wishlist", errors);
 
-  for (const field of wishlistFields) {
-    if (!(field in value)) {
-      errors.push(`wishlist.${field}: required field is missing.`);
-    }
-  }
-
-  validateString(value.slug, "wishlist.slug", errors, { maxLength: 120 });
+  validateString(value.slug, "wishlist.slug", errors, {
+    maxLength: 120,
+  });
 
   if (typeof value.slug === "string" && !stableKeyPattern.test(value.slug)) {
     errors.push(
@@ -119,14 +129,21 @@ function validateWishlist(value) {
     );
   }
 
-  validateString(value.title, "wishlist.title", errors, { maxLength: 120 });
+  validateString(value.title, "wishlist.title", errors, {
+    maxLength: 120,
+  });
+
   validateString(value.ownerName, "wishlist.ownerName", errors, {
     maxLength: 80,
   });
+
   validateString(value.description, "wishlist.description", errors, {
     maxLength: 500,
   });
-  validateString(value.icon, "wishlist.icon", errors, { maxLength: 20 });
+
+  validateString(value.icon, "wishlist.icon", errors, {
+    maxLength: 20,
+  });
 
   if (value.theme !== "classic" && value.theme !== "bubblegum") {
     errors.push('wishlist.theme: must be either "classic" or "bubblegum".');
@@ -151,7 +168,9 @@ function validateWishlist(value) {
   if (!Array.isArray(value.gifts) || value.gifts.length === 0) {
     errors.push("wishlist.gifts: must contain at least one gift.");
   } else {
-    value.gifts.forEach((gift, index) => validateGift(gift, index, errors));
+    value.gifts.forEach((gift, index) => {
+      validateGift(gift, index, errors);
+    });
 
     const giftKeyIndexes = new Map();
 
@@ -164,7 +183,7 @@ function validateWishlist(value) {
 
       if (previousIndex !== undefined) {
         errors.push(
-          `gifts[index].key:duplicatesgifts[{previousIndex}].key "${gift.key}".`,
+          `gifts[${index}].key: duplicates gifts[${previousIndex}].key "${gift.key}".`,
         );
         return;
       }
