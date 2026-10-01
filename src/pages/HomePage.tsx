@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 import AppFooter from "../components/AppFooter";
-import MacWindow from "../components/MacWindow";
+import AppShell from "../components/AppShell";
 import {
   getCachedFeaturedWishlists,
   loadFeaturedWishlists,
@@ -11,7 +11,6 @@ import type { FeaturedWishlist } from "../types/wishlist";
 
 function HomePage() {
   const cachedWishlists = getCachedFeaturedWishlists();
-
   const [wishlists, setWishlists] = useState<FeaturedWishlist[]>(
     () => cachedWishlists ?? [],
   );
@@ -28,7 +27,6 @@ function HomePage() {
       } else {
         setIsRefreshing(true);
       }
-
       setError(null);
 
       try {
@@ -57,7 +55,6 @@ function HomePage() {
         if (!isActive) {
           return;
         }
-
         setWishlists(featuredWishlists);
         setError(null);
       })
@@ -65,7 +62,6 @@ function HomePage() {
         if (!isActive) {
           return;
         }
-
         console.error("Could not load featured wishlists:", loadError);
         setError("The wishlists could not be loaded. Please try again.");
       })
@@ -73,7 +69,6 @@ function HomePage() {
         if (!isActive) {
           return;
         }
-
         setIsLoading(false);
         setIsRefreshing(false);
       });
@@ -90,135 +85,124 @@ function HomePage() {
   };
 
   return (
-    <main className="desktop">
-      <MacWindow title="Wishlist Directory">
-        <div className="wishlist-content">
-          <section className="intro">
-            <div className="intro-icon" aria-hidden="true">
-              🎁
-            </div>
-
-            <div>
-              <h2>Birthday Wishlists</h2>
-              <p>
-                Open a wishlist, choose a gift, and avoid buying the same thing
-                as someone else.
-              </p>
-            </div>
-          </section>
-
-          {error && (
-            <div className="notice notice--error" role="alert">
-              <span>{error}</span>
-
-              <button
-                className="notice-action"
-                type="button"
-                onClick={retryLoading}
-              >
-                Try again
-              </button>
-            </div>
-          )}
-
-          {isRefreshing && wishlists.length > 0 && (
-            <div className="sr-only" role="status" aria-live="polite">
-              Refreshing wishlists.
-            </div>
-          )}
-
-          {isLoading ? (
-            <div className="state-window" role="status">
-              <span className="state-icon" aria-hidden="true">
-                ⌛
-              </span>
-              <p>Loading wishlists...</p>
-            </div>
-          ) : wishlists.length === 0 && !error ? (
-            <div className="state-window">
-              <span className="state-icon" aria-hidden="true">
-                □
-              </span>
-              <p>No public wishlists are available yet.</p>
-            </div>
-          ) : (
-            <section
-              className="wishlist-directory"
-              aria-label="Public wishlists"
-              aria-busy={isRefreshing}
-            >
-              {wishlists.map((wishlist) => (
-                <article className="directory-window" key={wishlist.slug}>
-                  <header className="window-title-bar">
-                    <div className="title-lines" aria-hidden="true">
-                      <span />
-                      <span />
-                      <span />
-                      <span />
-                    </div>
-
-                    <h2>{wishlist.ownerName}</h2>
-
-                    <div className="title-lines" aria-hidden="true">
-                      <span />
-                      <span />
-                      <span />
-                      <span />
-                    </div>
-                  </header>
-
-                  <div className="directory-content">
-                    <div className="directory-icon" aria-hidden="true">
-                      {wishlist.icon}
-                    </div>
-
-                    <h3>{wishlist.title}</h3>
-                    <p>{wishlist.description}</p>
-
-                    <div className="directory-stats">
-                      <span>
-                        {wishlist.giftCount}{" "}
-                        {wishlist.giftCount === 1 ? "gift" : "gifts"}
-                      </span>
-                      <span>{wishlist.availableCount} available</span>
-                    </div>
-
-                    <Link
-                      className="retro-button directory-link"
-                      to={`/w/${wishlist.slug}`}
-                      onPointerEnter={() => {
-                        void prefetchWishlistPage(wishlist.slug).catch(
-                          (prefetchError: unknown) => {
-                            console.debug(
-                              `Could not prefetch wishlist ${wishlist.slug}:`,
-                              prefetchError,
-                            );
-                          },
-                        );
-                      }}
-                      onFocus={() => {
-                        void prefetchWishlistPage(wishlist.slug).catch(
-                          (prefetchError: unknown) => {
-                            console.debug(
-                              `Could not prefetch wishlist ${wishlist.slug}:`,
-                              prefetchError,
-                            );
-                          },
-                        );
-                      }}
-                    >
-                      Open wishlist
-                    </Link>
-                  </div>
-                </article>
-              ))}
-            </section>
-          )}
-
-          <AppFooter />
+    <AppShell title="Wishlist Directory">
+      <section className="intro">
+        <div className="intro-icon" aria-hidden="true">
+          🎁
         </div>
-      </MacWindow>
-    </main>
+        <div>
+          <h2>Birthday Wishlists</h2>
+          <p>
+            Open a wishlist, choose a gift, and avoid buying the same thing as
+            someone else.
+          </p>
+        </div>
+      </section>
+
+      {error && (
+        <div className="notice notice--error" role="alert">
+          <span>{error}</span>
+          <button
+            className="notice-action"
+            type="button"
+            onClick={retryLoading}
+          >
+            Try again
+          </button>
+        </div>
+      )}
+
+      {isRefreshing && wishlists.length > 0 && (
+        <div className="sr-only" role="status" aria-live="polite">
+          Refreshing wishlists.
+        </div>
+      )}
+
+      {isLoading ? (
+        <div className="state-window" role="status">
+          <span className="state-icon" aria-hidden="true">
+            ⌛
+          </span>
+          <p>Loading wishlists...</p>
+        </div>
+      ) : wishlists.length === 0 && !error ? (
+        <div className="state-window">
+          <span className="state-icon" aria-hidden="true">
+            □
+          </span>
+          <p>No public wishlists are available yet.</p>
+        </div>
+      ) : (
+        <section
+          className="wishlist-directory"
+          aria-label="Public wishlists"
+          aria-busy={isRefreshing}
+        >
+          {wishlists.map((wishlist) => (
+            <article className="directory-window" key={wishlist.slug}>
+              <header className="window-title-bar">
+                <div className="title-lines" aria-hidden="true">
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                </div>
+                <h2>{wishlist.ownerName}</h2>
+                <div className="title-lines" aria-hidden="true">
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                </div>
+              </header>
+
+              <div className="directory-content">
+                <div className="directory-icon" aria-hidden="true">
+                  {wishlist.icon}
+                </div>
+                <h3>{wishlist.title}</h3>
+                <p>{wishlist.description}</p>
+                <div className="directory-stats">
+                  <span>
+                    {wishlist.giftCount}{" "}
+                    {wishlist.giftCount === 1 ? "gift" : "gifts"}
+                  </span>
+                  <span>{wishlist.availableCount} available</span>
+                </div>
+                <Link
+                  className="retro-button directory-link"
+                  to={`/w/${wishlist.slug}`}
+                  onPointerEnter={() => {
+                    void prefetchWishlistPage(wishlist.slug).catch(
+                      (prefetchError: unknown) => {
+                        console.debug(
+                          `Could not prefetch wishlist ${wishlist.slug}:`,
+                          prefetchError,
+                        );
+                      },
+                    );
+                  }}
+                  onFocus={() => {
+                    void prefetchWishlistPage(wishlist.slug).catch(
+                      (prefetchError: unknown) => {
+                        console.debug(
+                          `Could not prefetch wishlist ${wishlist.slug}:`,
+                          prefetchError,
+                        );
+                      },
+                    );
+                  }}
+                >
+                  Open wishlist
+                </Link>
+              </div>
+            </article>
+          ))}
+        </section>
+      )}
+
+      <AppFooter />
+    </AppShell>
   );
 }
 
