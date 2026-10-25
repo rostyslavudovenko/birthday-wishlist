@@ -167,7 +167,7 @@ function ReservationDialog({
 
           <div className="dialog-actions">
             <button
-              className="retro-button retro-button--secondary"
+              className="retro-button retro-button--secondary retro-button--inline"
               type="button"
               disabled={isSubmitting}
               onClick={onCancel}
@@ -176,7 +176,7 @@ function ReservationDialog({
             </button>
 
             <button
-              className="retro-button retro-button--default"
+              className="retro-button retro-button--default retro-button--inline"
               type="submit"
               disabled={isSubmitting}
             >
