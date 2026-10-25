@@ -20,7 +20,7 @@ function NotFoundPage() {
 
             <p>The requested page does not exist or may have moved.</p>
 
-            <Link className="retro-button directory-link" to="/">
+            <Link className="retro-button retro-button--inline directory-link" to="/">
               Return home
             </Link>
           </div>

@@ -432,7 +432,7 @@ function WishlistPage() {
                     ? "Try loading the wishlist again or return to the public directory."
                     : "Check the link or return to the public wishlist directory."}
                 </p>
-                <Link className="retro-button directory-link" to="/">
+                <Link className="retro-button retro-button--inline directory-link" to="/">
                   Return home
                 </Link>
               </div>

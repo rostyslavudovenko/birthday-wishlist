@@ -63,6 +63,7 @@ function GiftCard({
 
   const chooseButtonClassName = [
     "retro-button",
+    "retro-button--block",
     gift.isReserved && !canRelease ? "gift-action--already-chosen" : "",
   ]
     .filter(Boolean)
@@ -132,7 +133,7 @@ function GiftCard({
 
           {showReleaseButton ? (
             <button
-              className="retro-button retro-button--secondary"
+              className="retro-button retro-button--secondary retro-button--block"
               type="button"
               disabled={isUpdating}
               onClick={() => onRelease(gift.id)}

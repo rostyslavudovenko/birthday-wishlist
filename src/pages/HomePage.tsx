@@ -184,7 +184,7 @@ function HomePage() {
                     </div>
 
                     <Link
-                      className="retro-button directory-link"
+                      className="retro-button retro-button--block directory-link"
                       to={`/w/${wishlist.slug}`}
                       onPointerEnter={() => {
                         void prefetchWishlistPage(wishlist.slug).catch(

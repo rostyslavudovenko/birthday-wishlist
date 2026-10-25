@@ -410,7 +410,6 @@
 }
 
 .retro-button {
-  width: 100%;
   min-height: 42px;
   padding: 9px 14px;
   border: 2px solid var(--black);
@@ -422,6 +421,14 @@
   font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
+}
+
+.retro-button--block {
+  width: 100%;
+}
+
+.retro-button--inline {
+  width: auto;
 }
 
 .retro-button:hover:not(:disabled) {
@@ -816,7 +823,7 @@
     flex-direction: column-reverse;
   }
 
-  .dialog-actions .retro-button {
+  .dialog-actions .retro-button--inline {
     width: 100%;
   }
 
@@ -929,8 +936,7 @@
   margin-top: 24px;
 }
 
-.dialog-actions .retro-button {
-  width: auto;
+.dialog-actions .retro-button--inline {
   min-width: 120px;
 }
 
@@ -1037,7 +1043,6 @@ body.dialog-open {
 }
 
 .about-dialog__close {
-  width: auto;
   min-width: 120px;
   margin-top: 26px;
 }
