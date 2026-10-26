@@ -453,14 +453,14 @@
   cursor: not-allowed;
 }
 
-.retro-button--default {
+.retro-button--primary {
   position: relative;
   border-width: 3px;
   outline: 2px solid var(--black);
   outline-offset: 2px;
 }
 
-.retro-button--default:active:not(:disabled) {
+.retro-button--primary:active:not(:disabled) {
   outline-offset: 1px;
 }
 
