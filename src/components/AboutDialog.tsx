@@ -118,7 +118,7 @@ function AboutDialog({ onClose }: AboutDialogProps) {
 
           <button
             ref={closeButtonRef}
-            className="retro-button retro-button--default retro-button--inline about-dialog__close"
+            className="retro-button retro-button--primary retro-button--inline about-dialog__close"
             type="button"
             onClick={onClose}
           >

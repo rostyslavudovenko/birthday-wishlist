@@ -176,7 +176,7 @@ function ReservationDialog({
             </button>
 
             <button
-              className="retro-button retro-button--default retro-button--inline"
+              className="retro-button retro-button--primary retro-button--inline"
               type="submit"
               disabled={isSubmitting}
             >

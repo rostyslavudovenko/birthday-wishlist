@@ -63,6 +63,7 @@ function GiftCard({
 
   const chooseButtonClassName = [
     "retro-button",
+    "retro-button--primary",
     "retro-button--block",
     gift.isReserved && !canRelease ? "gift-action--already-chosen" : "",
   ]
