@@ -1,0 +1,136 @@
+.gift-burst {
+  position: absolute;
+  z-index: 1;
+  top: -16px;
+  right: -12px;
+  display: none;
+}
+
+[data-wishlist-theme="bubblegum"] .gift-burst {
+  --burst-pink: #ff7ab8;
+  display: flex;
+  width: 86px;
+  height: 86px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  padding: 4px 2px;
+  background: var(--burst-pink);
+  clip-path: polygon(
+    50% 0%,
+    61% 27%,
+    85% 15%,
+    73% 39%,
+    100% 50%,
+    73% 61%,
+    85% 85%,
+    61% 73%,
+    50% 100%,
+    39% 73%,
+    15% 85%,
+    27% 61%,
+    0% 50%,
+    27% 39%,
+    15% 15%,
+    39% 27%
+  );
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+  rotate: 12deg;
+  filter: drop-shadow(2px 2px 0 rgba(17, 17, 17, 0.4));
+}
+
+.gift-burst em {
+  display: block;
+  font-style: normal;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .gift-burst {
+    animation: burst-wiggle 3s steps(2) infinite;
+  }
+}
+
+@keyframes burst-wiggle {
+  0%,
+  100% {
+    rotate: 8deg;
+  }
+
+  50% {
+    rotate: 16deg;
+  }
+}
+
+.candy-burst {
+  position: fixed;
+  z-index: 15;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.candy-burst span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  line-height: 1;
+  opacity: 0;
+  animation: candy-burst-fly var(--dur) cubic-bezier(0.16, 0.67, 0.36, 1)
+    var(--delay) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes candy-burst-fly {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translate3d(var(--ox), var(--oy), 0)
+      scale(var(--scale)) rotate(0deg);
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  48% {
+    transform: translate(-50%, -50%)
+      translate3d(calc(var(--ox) + var(--dx)), calc(var(--oy) - var(--rise)), 0)
+      scale(var(--scale)) rotate(var(--rot));
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%)
+      translate3d(
+        calc(var(--ox) + var(--dx) * 0.6),
+        calc(var(--oy) + var(--fall)),
+        0
+      )
+      scale(calc(var(--scale) * 0.85)) rotate(var(--rot));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .candy-burst {
+    display: grid;
+    place-content: center;
+    gap: 6px;
+    grid-template-columns: repeat(auto-fill, minmax(30px, 30px));
+    align-content: center;
+    justify-content: center;
+    max-width: 100%;
+  }
+
+  .candy-burst span {
+    position: static;
+    opacity: 1;
+    animation: none;
+  }
+}

@@ -1,0 +1,63 @@
+.wishlist-window,
+.gift-window {
+  background: var(--surface);
+  border: 2px solid var(--black);
+  box-shadow: var(--window-shadow);
+}
+
+.wishlist-window {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+}
+
+.window-title-bar {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(16px, 1fr) auto minmax(16px, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 5px 8px;
+  border-bottom: 2px solid var(--black);
+  background: var(--surface);
+}
+
+[data-wishlist-theme="bubblegum"] .window-title-bar,
+[data-wishlist-theme="bubblegum"] .toolbar,
+[data-wishlist-theme="bubblegum"] .notice {
+  background: var(--color-surface-secondary);
+}
+
+.window-title-bar h1,
+.window-title-bar h2 {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.window-title-bar--main {
+  min-height: 40px;
+}
+
+.window-title-bar--main h1 {
+  font-size: 0.95rem;
+}
+
+.title-lines {
+  display: grid;
+  gap: 2px;
+}
+
+.title-lines span {
+  display: block;
+  height: 1px;
+  background: var(--black);
+}
+
+@media (max-width: 560px) {
+  .window-title-bar {
+    grid-template-columns: minmax(8px, 1fr) auto minmax(8px, 1fr);
+  }
+}

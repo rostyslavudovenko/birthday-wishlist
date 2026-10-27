@@ -1,6 +1,6 @@
 import { useLayoutEffect } from "react";
 import { Route, Routes, useLocation, useParams } from "react-router";
-import "./App.css";
+import "./styles/index.css";
 import HomePage from "./pages/HomePage";
 import NotFoundPage from "./pages/NotFoundPage";
 import WishlistPage from "./pages/WishlistPage";
