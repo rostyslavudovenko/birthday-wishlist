@@ -78,13 +78,11 @@ Treat every database backup as private.
 
 ## Verify generated files
 
-List the generated files:
-
 ```bash
 find backups \
--maxdepth 2 \
--type f \
--exec ls -lh {} \;
+  -maxdepth 2 \
+  -type f \
+  -exec ls -lh {} \;
 ```
 
 Confirm that Git ignores the backup directory:
@@ -103,8 +101,8 @@ Check a generated data file directly:
 
 ```bash
 find backups \
--name "data.sql" \
--print0 |
+  -name "data.sql" \
+  -print0 |
 xargs -0 git check-ignore
 ```
 
@@ -114,8 +112,8 @@ Inspect expected database object definitions without printing private records:
 
 ```bash
 grep -E \
-"CREATE TABLE|CREATE FUNCTION|CREATE VIEW" \
-backups/*/schema.sql
+  "CREATE TABLE|CREATE FUNCTION|CREATE VIEW" \
+  backups/*/schema.sql
 ```
 
 The schema should contain objects related to:
@@ -134,8 +132,6 @@ sync_wishlist_with_gifts
 
 ## Verify the data structure
 
-Confirm that the logical data dump contains the expected tables:
-
 ```bash
 grep -c "COPY public.wishlists" backups/*/data.sql
 grep -c "COPY public.gifts" backups/*/data.sql
@@ -145,30 +141,21 @@ Do not print the complete `data.sql` file in chat, GitHub issues, pull requests,
 
 ## Create an encrypted archive
 
-Find the newest backup directory:
-
 ```bash
 latest_backup="$(
-find backups \
--mindepth 1 \
--maxdepth 1 \
--type d |
-sort |
-tail -n 1
+  find backups \
+    -mindepth 1 \
+    -maxdepth 1 \
+    -type d |
+  sort |
+  tail -n 1
 )"
-```
 
-Create an encrypted archive:
-
-```bash
 archive_name="backups/supabase-backup-$(date -u '+%Y-%m-%d').zip"
-
 zip -er "$archive_name" "$latest_backup"
 ```
 
-Use a strong archive password stored in a password manager.
-
-Do not reuse the Supabase database password as the archive password.
+Use a strong archive password stored in a password manager. Do not reuse the Supabase database password as the archive password.
 
 Test the encrypted archive:
 
@@ -210,7 +197,7 @@ Do not restore a backup directly over production without testing it first.
 
 ```text
 scripts/backup-supabase.sh
-skills/birthday-wishlist-backup/SKILL.md
+docs/supabase-backup.md
 docs/wishlist-importer.md
 .github/workflows/supabase-health-check.yml
 .gitignore
