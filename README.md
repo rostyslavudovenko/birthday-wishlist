@@ -63,7 +63,7 @@ Reservation names and ownership tokens remain private. Other visitors only see w
 ```text
 /                    Public wishlist directory
 /w/:slug             Public or unlisted wishlist
-/*                    Not-found page
+/*                   Not-found page
 ```
 
 Public and featured wishlists appear in the directory.
@@ -169,6 +169,8 @@ The application will be available at the local URL printed by Vite.
 
 - `npm run dev` - Start the development server with hot reload
 - `npm run lint` - Run ESLint
+- `npm test` - Run the automated test suite once
+- `npm run test:watch` - Run the automated test suite in watch mode
 - `npm run build` - Run TypeScript checks and create a production build
 - `npm run preview` - Preview the production build locally
 - `npm run wishlist:validate` - Validate a wishlist JSON definition
@@ -180,6 +182,7 @@ The application will be available at the local URL printed by Vite.
 Before committing changes, run:
 
 ```bash
+npm test
 npm run lint
 npm run build
 git diff --check
@@ -242,19 +245,9 @@ Copy the synthetic example:
 cp examples/wishlist.example.json wishlists/private/new-wishlist.json
 ```
 
-Edit only the private copy.
-
-Private wishlist definitions belong in:
-
-```text
-wishlists/private/
-```
-
-The directory is excluded from Git.
+Edit only the private copy. Private wishlist definitions belong in `wishlists/private/`, which is excluded from Git.
 
 ### Wishlist Format
-
-A wishlist definition contains the wishlist metadata and all gifts:
 
 ```json
 {
@@ -288,69 +281,21 @@ Second gift    20
 Third gift     30
 ```
 
-### Validate the Definition
+### Validate, Preflight, and Import
 
 ```bash
 npm run wishlist:validate -- wishlists/private/new-wishlist.json
-```
-
-Validation checks:
-
-- Required fields
-- Field types
-- Slug format
-- Stable gift keys
-- Supported themes
-- Supported visibility
-- Field lengths
-- Gift definitions
-- Image values
-- Store URLs
-- Unknown properties
-
-### Run the Preflight
-
-```bash
 npm run wishlist:preflight -- wishlists/private/new-wishlist.json
-```
-
-The preflight:
-
-- Validates the JSON again
-- Checks Supabase availability
-- Confirms that the slug is not already used
-- Displays the planned gift order
-- Does not write data
-
-### Import the Wishlist
-
-```bash
 npm run wishlist:import -- wishlists/private/new-wishlist.json --confirm
 ```
 
-The importer repeats validation and preflight before writing data.
-
-The wishlist and all gifts are created in one PostgreSQL transaction. If any operation fails, the complete import is rolled back.
+The importer repeats validation and preflight before writing data. The wishlist and all gifts are created in one PostgreSQL transaction. If any operation fails, the complete import is rolled back.
 
 ### Export and Synchronize Wishlists
 
-Existing wishlists can be exported to private JSON definitions, edited, and synchronized atomically:
-
-1. Export an existing wishlist:
-
 ```bash
 npm run wishlist:export -- sample-birthday-list
-```
-
-2. Validate and preview the planned changes:
-
-```bash
 npm run wishlist:sync -- wishlists/private/sample-birthday-list.json
-```
-
-3. Apply changes atomically after reviewing the preview:
-
-```bash
 npm run wishlist:sync -- wishlists/private/sample-birthday-list.json --confirm
 ```
 
@@ -374,21 +319,13 @@ backups/<timestamp>/
 └── README.txt
 ```
 
-Generated backups are private and excluded from Git.
-
-Before making database schema changes, create and verify a fresh backup.
+Generated backups are private and excluded from Git. Before making database schema changes, create and verify a fresh backup.
 
 For configuration, verification, storage, and restoration guidance, see [docs/supabase-backup.md](docs/supabase-backup.md).
 
 ## Availability Monitoring
 
-The repository includes a scheduled GitHub Actions workflow:
-
-```text
-.github/workflows/supabase-health-check.yml
-```
-
-The workflow:
+The repository includes `.github/workflows/supabase-health-check.yml`, a scheduled GitHub Actions workflow that:
 
 - Runs automatically on a schedule
 - Supports manual execution
@@ -400,8 +337,6 @@ The workflow:
 ## Deployment
 
 The frontend is deployed through Cloudflare Pages.
-
-Recommended production configuration:
 
 ```text
 Production branch: main
@@ -441,18 +376,26 @@ birthday-wishlist/
 │   │   ├── sync-wishlist.mjs                # Atomic wishlist synchronizer
 │   │   └── validate-wishlist.mjs            # Local JSON validator
 │   └── backup-supabase.sh                   # Supabase backup script
-├── skills/
-│   ├── birthday-wishlist-admin/             # Admin workflow skill
-│   └── birthday-wishlist-backup/            # Backup workflow skill
 ├── src/
 │   ├── assets/                              # Local font assets
 │   ├── components/                          # Reusable interface components
 │   ├── lib/                                 # Supabase client configuration
 │   ├── pages/                               # Application pages
 │   ├── services/                            # Supabase and Realtime services
+│   ├── styles/                              # Application component and page styles
+│   │   ├── app-shell.css
+│   │   ├── buttons.css
+│   │   ├── dialogs.css
+│   │   ├── effects.css
+│   │   ├── gift-card.css
+│   │   ├── index.css
+│   │   ├── menu.css
+│   │   ├── states.css
+│   │   ├── utilities.css
+│   │   ├── windows.css
+│   │   └── wishlist-directory.css
 │   ├── types/                               # TypeScript data types
 │   ├── utils/                               # Local storage utilities
-│   ├── App.css                              # Application styles
 │   ├── App.tsx                              # Application routing
 │   ├── index.css                            # Base stylesheet and font definitions
 │   └── main.tsx                             # Frontend entry point
@@ -465,7 +408,6 @@ birthday-wishlist/
 │       └── 20260826120000_add_wishlist_theme.sql
 ├── .env.example                             # Frontend environment example
 ├── .env.wishlist-importer.example           # Local importer environment example
-├── AGENTS.md                                # Project AI agent guidelines
 ├── LICENSE
 ├── package-lock.json
 ├── package.json
@@ -497,13 +439,12 @@ birthday-wishlist/
 
 ## Contributing
 
-Contributions are welcome! If you have an idea, improvement, or found a bug, please create a new [GitHub Issue](https://github.com/rostyslavudovenko/birthday-wishlist).
-
-Please check the [existing issues](https://github.com/rostyslavudovenko/birthday-wishlist) before creating a new one to avoid duplicates.
+Contributions are welcome. If you have an idea, improvement, or found a bug, create a new [GitHub Issue](https://github.com/rostyslavudovenko/birthday-wishlist).
 
 Before submitting a pull request:
 
 ```bash
+npm test
 npm run lint
 npm run build
 git diff --check
