@@ -457,5 +457,3 @@ Licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 ---
 
 Made with ❤️ by [Rostyslav Udovenko](mailto:rostyslavudovenko@icloud.com)
-
-<!-- Trigger fresh Cloudflare Pages preview -->
